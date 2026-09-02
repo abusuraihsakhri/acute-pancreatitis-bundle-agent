@@ -1,95 +1,129 @@
-# Acute Pancreatitis Clinical Decision Support & Care Bundle System
+# Acute Pancreatitis Bundle Agent
 
-Production-grade gastroenterology and critical care decision engine implementing international evidence-based guidelines (**IAP/APA, ACG, and Revised Atlanta Classification 2012**) for **severity stratification**, **multiorgan failure scoring**, **goal-directed fluid resuscitation**, and **nutrition/antibiotic bundle management**.
+> **Domain:** Gastroenterology, Hepatology & Clinical Nutrition  
+> **Reference Guidelines & Standards:** `AASLD & ACG Clinical Practice Guidelines`
 
----
+<div align="center">
 
-## Clinical Frameworks Implemented
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
+![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
+![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
 
-### 1. Revised Atlanta Classification 2012 (*Banks et al., Gut 2013*)
-- **Mild Acute Pancreatitis**:
-  * Absence of organ failure.
-  * Absence of local or systemic complications.
-  * Resolves within days; managed on the regular floor.
-- **Moderately Severe Acute Pancreatitis**:
-  * **Transient organ failure** (resolves within 48 hours), **OR**
-  * Local complications (acute peripancreatic fluid collection, acute necrotic collection, pseudocyst), **OR**
-  * Exacerbation of pre-existing co-morbid disease.
-- **Severe Acute Pancreatitis**:
-  * **Persistent organ failure** ($\ge 48$ hours), single or multiple organ systems.
-  * Mandatory high-dependency / ICU admission.
+</div>
 
 ---
 
-### 2. Bedside Index for Severity in Acute Pancreatitis (BISAP)
-Five objective binary criteria evaluated within 24 hours of admission:
-- **B**: $\text{BUN} > 25\text{ mg/dL}$ ($8.9\text{ mmol/L}$)
-- **I**: Impaired mental status ($\text{GCS} < 15$ or acute disorientation)
-- **S**: SIRS criteria $\ge 2$ met
-- **A**: Age $> 60$ years
-- **P**: Pleural effusion present on imaging
+## 📖 What It Does
 
-| BISAP Score | In-Hospital Mortality Risk | Clinical Triage Tier |
-| :---: | :---: | :---: |
-| 0 | 0.1% | Low Risk |
-| 1 | 0.4% | Low Risk |
-| 2 | 1.6% | Intermediate Risk |
-| 3 | 3.6% | High Risk / Stepdown |
-| 4 | 7.4% | Critical Risk / ICU |
-| 5 | 18.0% | Extremely High Risk / ICU |
+**Acute Pancreatitis Bundle Agent** is an advanced analytical and computational platform implementing Revised Atlanta Classification & 24h SIRS Resuscitation Agent.
+
+Acute Pancreatitis Clinical Decision Support & Bundle Care Protocol Engine.
+
+Clinical Frameworks:
+1. Revised Atlanta Classification 2012 (Mild, Moderately Severe, Severe).
+2. Bedside Index for Severity in Acute Pancreatitis (BISAP) Score & Mortality Stratification.
+3. Modified Marshall Scoring System for Multiorgan Failure (Respiratory, Renal, Cardiovascular).
+4. Systemic Inflammatory Response Syndrome (SIRS) Trajectory & Persistent SIRS Detection.
+5. Ranson's Criteria (Admission and 48-Hour Progression).
+6. Balthazar Computed Tomography Severity Index (CTSI) & Necrosis Assessment.
+7. Goal-Directed Fluid Resuscitation & Enteral Nutrition Bundle Guidelines.
 
 ---
 
-### 3. Modified Marshall Scoring System for Organ Failure
+## ⚙️ Key Capabilities & Algorithmic Modules
 
-Organ failure defined as a score $\ge 2$ in any domain:
+### 🔬 Core Algorithmic & Evaluation Engines
 
-| Domain | Score 0 | Score 1 | Score 2 (Organ Failure) | Score 3 | Score 4 |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Respiratory ($\text{PaO}_2 / \text{FiO}_2$)** | $> 400$ | $301\text{--}400$ | $201\text{--}300$ | $101\text{--}200$ | $\le 101$ |
-| **Renal ($\text{Cr in mg/dL}$)** | $\le 1.4$ | $1.5\text{--}1.8$ | $1.9\text{--}3.6$ | $3.7\text{--}4.9$ | $> 4.9$ |
-| **Cardiovascular ($\text{SBP in mmHg}$)** | $> 90$ | $\le 90$ (fluid-responsive) | $\le 90$ (fluid-refractory) | $\le 90 + \text{pH} < 7.30$ | $\le 90 + \text{pH} < 7.20$ |
-
----
-
-### 4. Goal-Directed Fluid & Bundle Guidelines
-- **Fluid Selection**: **Lactated Ringer's (LR)** preferred over Normal Saline (reduces systemic inflammation, metabolic acidosis, and incidence of SIRS).
-- **Rate**: $200\text{--}250\text{ mL/h}$ or initial $20\text{ mL/kg}$ bolus if hemoconcentration ($\text{Hct} > 44\%$) or hypotension present. Target $\text{UO} > 0.5\text{--}1.0\text{ mL/kg/h}$ and BUN reduction.
-- **Nutrition**: Early oral feeding for mild pancreatitis; early enteral tube feeding (NG or NJ) within 24-72 hours for severe disease.
-- **Antibiotic Stewardship**: Prophylactic antibiotics are **NOT indicated** for sterile acute necrotizing pancreatitis.
+- **`PancreatitisLabs`** — dedicated module for pancreatitis labs evaluation and state verification.
+- **`BISAPResult`** — dedicated module for b i s a p result evaluation and state verification.
+- **`MarshallScoreResult`** — dedicated module for marshall score result evaluation and state verification.
+- **`AtlantaClassificationResult`** — dedicated module for atlanta classification result evaluation and state verification.
+- **`RansonResult`** — dedicated module for ranson result evaluation and state verification.
+- **`CTSIResult`** — dedicated module for c t s i result evaluation and state verification.
 
 ---
 
-## Command Line Interface (CLI)
+## 📐 Mathematical Formulation & Logic
 
-### 1. Single Patient Assessment
-```bash
-python cli.py --evaluate --patient-id "AP-001" --bun 32.0 --cr 2.2 --pao2-fio2 240.0 --sbp 85.0 --of-hours 52.0
-```
-
-### 2. Output as JSON
-```bash
-python cli.py --evaluate --patient-id "AP-002" --bun 12.0 --cr 0.9 --format json
-```
-
-### 3. Batch Patient Cohort Processing
-```bash
-python cli.py --batch cohort.json --format json --output evaluated_bundle.json
-```
-
-### 4. Interactive Console Wizard
-```bash
-python cli.py --interactive
+```text
+  score = sum(1 for v in criteria.values() if v)
+  elif score == 2:
+  elif score == 3:
+  max_score = max(resp, renal, cardio)
+  adm = self.calculate_admission(labs)
 ```
 
 ---
 
-## Unit Testing
+## 💻 CLI Quickstart & Usage
 
-Execute all unit tests with 100% standard Python:
+### 1. Guided Interactive Mode
+```bash
+python cli.py
+```
+
+### 2. Direct Parameterized Evaluation
+```bash
+python cli.py --interactive <value> --evaluate <value> --batch <value> --patient-id <value>
+```
+
+### Parameter Reference
+- `--interactive`: Specifies input measurement or parameter value.
+- `--evaluate`: Specifies input measurement or parameter value.
+- `--batch`: Specifies input measurement or parameter value.
+- `--patient-id`: Specifies input measurement or parameter value.
+- `--age`: Specifies input measurement or parameter value.
+- `--gcs`: Specifies input measurement or parameter value.
+- `--temp`: Specifies input measurement or parameter value.
+- `--hr`: Specifies input measurement or parameter value.
+- `--rr`: Specifies input measurement or parameter value.
+- `--sbp`: Specifies input measurement or parameter value.
+
+### Input Data Schema
+
+| Field | Description | Requirement |
+|:------|:------------|:------------|
+| `case_id` | Parameter / observation metric | Required |
+| `patient_synthetic_id` | Parameter / observation metric | Required |
+| `metric_primary` | Parameter / observation metric | Required |
+| `metric_secondary` | Parameter / observation metric | Required |
+| `is_stat` | Parameter / observation metric | Required |
+| `status_flag` | Parameter / observation metric | Required |
+
+---
+
+## 🛡️ Security & Enterprise Architecture
+
+* **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
+* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
+* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
+* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
+* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+
+---
+
+## 🧪 Testing & Verification
+
+Run the automated test suite:
 
 ```bash
-python -m unittest discover -s tests -v
-# or
-python test_pancreas_guard.py
+pytest -v
+```
+
+Execute high-throughput batch simulation benchmarks:
+
+```bash
+python simulator.py --tasks 1000 --concurrency 8
+```
+
+---
+
+## 🐳 Container Deployment
+
+```bash
+docker build -t acute-pancreatitis-bundle-agent .
+docker run -p 8000:8000 acute-pancreatitis-bundle-agent
 ```
