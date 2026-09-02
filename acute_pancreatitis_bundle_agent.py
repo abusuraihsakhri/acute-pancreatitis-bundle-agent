@@ -1,5 +1,5 @@
 """
-Acute Pancreatitis Bundle Decision Support Package.
+Acute Pancreatitis Bundle Decision Support Main Package.
 """
 
 from pancreatitis_severity import (

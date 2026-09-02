@@ -1,102 +1,95 @@
-# Acute Pancreatitis Bundle Agent
+# Acute Pancreatitis Clinical Decision Support & Care Bundle System
 
-> **Gastroenterology & Hepatic Monitoring**  
-> Reference Standards: `AASLD & ACG Clinical Guidelines`
-
-<div align="center">
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-
-</div>
+Production-grade gastroenterology and critical care decision engine implementing international evidence-based guidelines (**IAP/APA, ACG, and Revised Atlanta Classification 2012**) for **severity stratification**, **multiorgan failure scoring**, **goal-directed fluid resuscitation**, and **nutrition/antibiotic bundle management**.
 
 ---
 
-## Overview
+## Clinical Frameworks Implemented
 
-**Acute Pancreatitis Bundle Agent** is a production-grade analytical platform designed for high-throughput evaluation, deterministic verification, and automated compliance checking. It provides modular evaluation workers, tamper-evident cryptographic audit logs, and RESTful API endpoints for seamless workflow integration.
+### 1. Revised Atlanta Classification 2012 (*Banks et al., Gut 2013*)
+- **Mild Acute Pancreatitis**:
+  * Absence of organ failure.
+  * Absence of local or systemic complications.
+  * Resolves within days; managed on the regular floor.
+- **Moderately Severe Acute Pancreatitis**:
+  * **Transient organ failure** (resolves within 48 hours), **OR**
+  * Local complications (acute peripancreatic fluid collection, acute necrotic collection, pseudocyst), **OR**
+  * Exacerbation of pre-existing co-morbid disease.
+- **Severe Acute Pancreatitis**:
+  * **Persistent organ failure** ($\ge 48$ hours), single or multiple organ systems.
+  * Mandatory high-dependency / ICU admission.
 
 ---
 
-## Architecture
+### 2. Bedside Index for Severity in Acute Pancreatitis (BISAP)
+Five objective binary criteria evaluated within 24 hours of admission:
+- **B**: $\text{BUN} > 25\text{ mg/dL}$ ($8.9\text{ mmol/L}$)
+- **I**: Impaired mental status ($\text{GCS} < 15$ or acute disorientation)
+- **S**: SIRS criteria $\ge 2$ met
+- **A**: Age $> 60$ years
+- **P**: Pleural effusion present on imaging
 
+| BISAP Score | In-Hospital Mortality Risk | Clinical Triage Tier |
+| :---: | :---: | :---: |
+| 0 | 0.1% | Low Risk |
+| 1 | 0.4% | Low Risk |
+| 2 | 1.6% | Intermediate Risk |
+| 3 | 3.6% | High Risk / Stepdown |
+| 4 | 7.4% | Critical Risk / ICU |
+| 5 | 18.0% | Extremely High Risk / ICU |
+
+---
+
+### 3. Modified Marshall Scoring System for Organ Failure
+
+Organ failure defined as a score $\ge 2$ in any domain:
+
+| Domain | Score 0 | Score 1 | Score 2 (Organ Failure) | Score 3 | Score 4 |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Respiratory ($\text{PaO}_2 / \text{FiO}_2$)** | $> 400$ | $301\text{--}400$ | $201\text{--}300$ | $101\text{--}200$ | $\le 101$ |
+| **Renal ($\text{Cr in mg/dL}$)** | $\le 1.4$ | $1.5\text{--}1.8$ | $1.9\text{--}3.6$ | $3.7\text{--}4.9$ | $> 4.9$ |
+| **Cardiovascular ($\text{SBP in mmHg}$)** | $> 90$ | $\le 90$ (fluid-responsive) | $\le 90$ (fluid-refractory) | $\le 90 + \text{pH} < 7.30$ | $\le 90 + \text{pH} < 7.20$ |
+
+---
+
+### 4. Goal-Directed Fluid & Bundle Guidelines
+- **Fluid Selection**: **Lactated Ringer's (LR)** preferred over Normal Saline (reduces systemic inflammation, metabolic acidosis, and incidence of SIRS).
+- **Rate**: $200\text{--}250\text{ mL/h}$ or initial $20\text{ mL/kg}$ bolus if hemoconcentration ($\text{Hct} > 44\%$) or hypotension present. Target $\text{UO} > 0.5\text{--}1.0\text{ mL/kg/h}$ and BUN reduction.
+- **Nutrition**: Early oral feeding for mild pancreatitis; early enteral tube feeding (NG or NJ) within 24-72 hours for severe disease.
+- **Antibiotic Stewardship**: Prophylactic antibiotics are **NOT indicated** for sterile acute necrotizing pancreatitis.
+
+---
+
+## Command Line Interface (CLI)
+
+### 1. Single Patient Assessment
+```bash
+python cli.py --evaluate --patient-id "AP-001" --bun 32.0 --cr 2.2 --pao2-fio2 240.0 --sbp 85.0 --of-hours 52.0
 ```
-                    +--------------------------------------------------+
-                    |             Air-Gapped Telemetry Stream          |
-                    +--------------------------------------------------+
-                                             |
-                                             v
-                    +--------------------------------------------------+
-                    |                 SystemSupervisor                 |
-                    |       (Zero-PHI Memory & HMAC Audit Trail)       |
-                    +--------------------------------------------------+
-                               /             |             \
-                              /              |              \
-                             v               v               v
-               +-------------------+ +---------------+ +-------------------+
-               | InvariantQCWorker | | SafetyWorker  | | ProtocolWorker    |
-               | (Boundary Auditor)| | (Safety Alert)| | (Spec Conformance)|
-               +-------------------+ +---------------+ +-------------------+
+
+### 2. Output as JSON
+```bash
+python cli.py --evaluate --patient-id "AP-002" --bun 12.0 --cr 0.9 --format json
+```
+
+### 3. Batch Patient Cohort Processing
+```bash
+python cli.py --batch cohort.json --format json --output evaluated_bundle.json
+```
+
+### 4. Interactive Console Wizard
+```bash
+python cli.py --interactive
 ```
 
 ---
 
-## Features
+## Unit Testing
 
-* **Zero-PHI Outbound Interceptors**: AST-level pattern matching preventing sensitive identifier leaks.
-* **Tamper-Evident Audit Logging**: Cryptographically linked HMAC-SHA256 records securing every transaction.
-* **Multi-Worker Event Loops**: Dedicated verification workers for quality control, safety bounds, and protocol conformance.
-* **REST & CLI Interfaces**: Complete FastAPI application and interactive command-line interface.
-* **Automated Test Coverage**: Comprehensive test suites verifying boundary conditions and operational stability.
-
----
-
-## Quick Start (CLI)
+Execute all unit tests with 100% standard Python:
 
 ```bash
-# Run task evaluation
-python cli.py audit --task-id TASK-2026-001 --primary 28.5
-
-# System configuration and status query
-python cli.py chat "Explain standard reference protocols and calibration limits"
-
-# Verify HMAC-SHA256 audit trail integrity
-python cli.py verify-audit
-
-# Launch FastAPI REST Server
-python cli.py serve --port 8000
+python -m unittest discover -s tests -v
+# or
+python test_pancreas_guard.py
 ```
-
----
-
-## API Reference
-
-| Endpoint | Method | Description |
-|:---------|:------:|:------------|
-| `/health` | `GET` | System health check and metadata |
-| `/metrics` | `GET` | Operational metrics exporter |
-| `/api/audit` | `POST` | Dispatches task payload across workers and compiles consensus dossier |
-| `/api/chat` | `POST` | System query interface |
-| `/api/audit/logs` | `GET` | Cryptographic HMAC-SHA256 audit trail log with integrity verification |
-
----
-
-## Python API Usage
-
-```python
-from enrichment import enrichment_suite
-
-# Execute the module suite
-results = enrichment_suite.execute_all(primary_val=2.5, secondary_val=1.2)
-for module_name, res in results.items():
-    print(f"[{res.status}] {res.feature_name} -> Score: {res.score}")
-```
-
----
-
-## License
-
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

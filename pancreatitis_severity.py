@@ -1,272 +1,475 @@
 #!/usr/bin/env python3
 """
-Revised Atlanta Classification Severity Scorer & SIRS Calculator for Pancreatitis.
-Implements BISAP, Ranson, CTSI, and Modified Marshall scoring with temporal trajectory tracking.
+Acute Pancreatitis Clinical Decision Support & Bundle Care Protocol Engine.
+
+Clinical Frameworks:
+1. Revised Atlanta Classification 2012 (Mild, Moderately Severe, Severe).
+2. Bedside Index for Severity in Acute Pancreatitis (BISAP) Score & Mortality Stratification.
+3. Modified Marshall Scoring System for Multiorgan Failure (Respiratory, Renal, Cardiovascular).
+4. Systemic Inflammatory Response Syndrome (SIRS) Trajectory & Persistent SIRS Detection.
+5. Ranson's Criteria (Admission and 48-Hour Progression).
+6. Balthazar Computed Tomography Severity Index (CTSI) & Necrosis Assessment.
+7. Goal-Directed Fluid Resuscitation & Enteral Nutrition Bundle Guidelines.
 """
-from dataclasses import dataclass, field
-from typing import List, Dict, Optional
+
+from dataclasses import dataclass, field, asdict
+from typing import List, Dict, Optional, Tuple, Any
 import datetime
+import math
+import json
 
 
 @dataclass
 class PancreatitisLabs:
-    bun: float = 0.0
-    glucose: float = 0.0
-    hct: float = 0.0
-    wbc: float = 0.0
+    bun_mg_dl: float = 15.0
+    creatinine_mg_dl: float = 1.0
+    hematocrit_pct: float = 40.0
+    wbc_k_ul: float = 9.0
     temp_c: float = 37.0
-    hr: int = 70
-    rr: int = 16
-    spo2: float = 98.0
-    albumin: float = 4.0
-    ldh: float = 100.0
-    calcium: float = 9.0
-    creatinine: float = 1.0
-    alt: float = 30.0
-    pao2: float = 100.0
+    heart_rate_bpm: int = 75
+    resp_rate_bpm: int = 16
+    spo2_pct: float = 98.0
+    pao2_fio2_ratio: float = 450.0  # PaO2/FiO2 ratio (e.g. 95/0.21 = 452)
+    systolic_bp_mmhg: float = 120.0
+    fluid_responsive_hypotension: bool = False
+    arterial_ph: float = 7.40
+    glucose_mg_dl: float = 110.0
+    calcium_mg_dl: float = 9.2
+    albumin_g_dl: float = 4.0
+    ldh_u_l: float = 180.0
+    ast_u_l: float = 35.0
+    lipase_u_l: float = 150.0
+    age: int = 45
 
 
 @dataclass
-class BISAPScore:
-    bun_over_25: bool
-    impaired_mentation: bool
-    sirs: bool
-    age_over_60: bool
+class BISAPResult:
+    bun_gt_25: bool
+    impaired_mental_status: bool
+    sirs_present: bool
+    age_gt_60: bool
     pleural_effusion: bool
-    total: int
-    mortality_pct: float
+    total_score: int
+    mortality_risk_pct: float
+    severity_tier: str  # "Low Risk (< 1%)", "Intermediate (1-4%)", "High Risk (> 15%)"
 
 
 @dataclass
-class RansonScore:
-    at_admission: List[str]
-    at_48h: List[str]
-    total: int
-    mortality_pct: float
+class MarshallScoreResult:
+    respiratory_score: int  # 0-4
+    renal_score: int        # 0-4
+    cardiovascular_score: int # 0-4
+    max_organ_score: int
+    has_organ_failure: bool  # score >= 2 in any domain
+    organ_failure_systems: List[str]
 
 
 @dataclass
-class CTSIScore:
-    degree_of_enhancement: int  # 0-4
-    peripancreatic_inflammation: int  # 0-4
-    acute_fluid_collections: int  # 0-2
-    total: int
-    grade: str
+class AtlantaClassificationResult:
+    category: str  # "Mild Acute Pancreatitis", "Moderately Severe Acute Pancreatitis", "Severe Acute Pancreatitis"
+    organ_failure_status: str  # "None", "Transient (< 48h)", "Persistent (>= 48h)"
+    local_complications: List[str]
+    systemic_complications: bool
+    recommended_level_of_care: str  # "Floor / Regular Ward", "Stepdown / Intermediate Care", "Intensive Care Unit (ICU)"
 
 
 @dataclass
-class ModifiedMarshallScore:
-    respiratory: int  # 0-4
-    renal: int  # 0-4
-    cardiovascular: int  # 0-4
-    total: int
-    mortality_pct: float
+class RansonResult:
+    admission_criteria_met: List[str]
+    at_48h_criteria_met: List[str]
+    total_score: int
+    estimated_mortality_pct: float
 
 
 @dataclass
-class TrajectoryReading:
-    timestamp: str
-    sirs_count: int
-    bun: float
-    creatinine: float
-    spo2: float
-    marshall_score: int
+class CTSIResult:
+    balthazar_grade: str  # A to E
+    balthazar_points: int # 0 to 4
+    necrosis_pct: float   # 0, <30%, 30-50%, >50%
+    necrosis_points: int  # 0, 2, 4, 6
+    total_ctsi: int       # 0 to 10
+    morbidity_risk: str
+    mortality_risk_pct: float
+
+
+@dataclass
+class FluidResuscitationGuideline:
+    recommended_fluid: str  # "Lactated Ringer's Solution (Preferred)"
+    initial_rate_ml_hr: float
+    bolus_indicated: bool
+    resuscitation_targets: List[str]
+    precautions: List[str]
+
+
+@dataclass
+class ComprehensivePancreatitisAssessment:
+    patient_id: str
+    atlanta_classification: AtlantaClassificationResult
+    bisap: BISAPResult
+    modified_marshall: MarshallScoreResult
+    sirs_criteria_count: int
+    sirs_present: bool
+    fluid_guidelines: FluidResuscitationGuideline
+    nutrition_guideline: str
+    antibiotic_guideline: str
+    action_items: List[str]
 
 
 class BISAPCalculator:
-    """Bedside Index for Severity in Acute Pancreatitis."""
+    """
+    Bedside Index for Severity in Acute Pancreatitis (BISAP).
+    Wu BU et al. Gut. 2008;57(12):1698-1703.
+    """
 
-    def calculate(self, labs: PancreatitisLabs, mental_status: str = "alert") -> BISAPScore:
-        scores = {
-            "BUN > 25": labs.bun > 25.0,
-            "Impaired mentation": mental_status.lower() not in ("alert", "oriented"),
-            "SIRS": self._is_sirs(labs),
-            "Age > 60": labs.wbc > 0,  # use as proxy if no age
-            "Pleural effusion": False,
+    def calculate(
+        self,
+        labs: PancreatitisLabs,
+        gcs_score: int = 15,
+        pleural_effusion_present: bool = False,
+    ) -> BISAPResult:
+        sirs_met = self._is_sirs(labs)
+        impaired_mental = gcs_score < 15
+
+        criteria = {
+            "bun_gt_25": labs.bun_mg_dl > 25.0,
+            "impaired_mental": impaired_mental,
+            "sirs": sirs_met,
+            "age_gt_60": labs.age > 60,
+            "pleural_effusion": pleural_effusion_present,
         }
-        total = sum(1 for v in scores.values() if v)
-        mortality_map = {0: 0.0, 1: 0.9, 2: 2.0, 3: 5.2, 4: 12.7, 5: 22.7}
-        return BISAPScore(
-            bun_over_25=scores["BUN > 25"],
-            impaired_mentation=scores["Impaired mentation"],
-            sirs=scores["SIRS"],
-            age_over_60=scores["Age > 60"],
-            pleural_effusion=scores["Pleural effusion"],
-            total=total,
-            mortality_pct=mortality_map.get(total, 22.7),
+
+        score = sum(1 for v in criteria.values() if v)
+
+        # Standard BISAP mortality correlation
+        mortality_map = {0: 0.1, 1: 0.4, 2: 1.6, 3: 3.6, 4: 7.4, 5: 18.0}
+        mortality = mortality_map.get(score, 18.0)
+
+        if score <= 1:
+            tier = "Low Risk of In-Hospital Mortality (< 1%)"
+        elif score == 2:
+            tier = "Intermediate Risk (1.6%)"
+        elif score == 3:
+            tier = "High Risk of Severe Disease & Mortality (3.6%)"
+        else:
+            tier = "Critical Risk (> 7-18% Mortality)"
+
+        return BISAPResult(
+            bun_gt_25=criteria["bun_gt_25"],
+            impaired_mental_status=criteria["impaired_mental"],
+            sirs_present=criteria["sirs"],
+            age_gt_60=criteria["age_gt_60"],
+            pleural_effusion=criteria["pleural_effusion"],
+            total_score=score,
+            mortality_risk_pct=mortality,
+            severity_tier=tier,
         )
 
     def _is_sirs(self, labs: PancreatitisLabs) -> bool:
-        criteria = [
-            labs.temp_c > 38.0 or labs.temp_c < 36.0,
-            labs.hr > 90,
-            labs.rr > 20,
-            labs.wbc > 12000 or labs.wbc < 4000,
+        crit_count = self.count_sirs(labs)
+        return crit_count >= 2
+
+    @staticmethod
+    def count_sirs(labs: PancreatitisLabs) -> int:
+        crit = [
+            (labs.temp_c > 38.0 or labs.temp_c < 36.0),
+            (labs.heart_rate_bpm > 90),
+            (labs.resp_rate_bpm > 20),
+            (labs.wbc_k_ul > 12.0 or labs.wbc_k_ul < 4.0),
         ]
-        return sum(criteria) >= 2
-
-
-class RansonCalculator:
-    """Ranson Criteria scoring at admission and 48 hours."""
-
-    def calculate_at_admission(self, labs: PancreatitisLabs) -> List[str]:
-        hits = []
-        if labs.age > 55:
-            hits.append("Age > 55")
-        if labs.wbc > 16000:
-            hits.append("WBC > 16,000")
-        if labs.glucose > 200:
-            hits.append("Glucose > 200 mg/dL")
-        if labs.ldh > 350:
-            hits.append("LDH > 350 IU/L")
-        if labs.alt > 250:
-            hits.append("AST > 250 IU/L")
-        return hits
-
-    def calculate_at_48h(self, labs: PancreatitisLabs) -> List[str]:
-        hits = []
-        if labs.hct > 46:
-            hits.append("HCT drop > 10%")
-        if labs.bun > 5:
-            hits.append("BUN rise > 5 mg/dL")
-        if labs.pao2 < 60:
-            hits.append("PaO2 < 60 mmHg")
-        if labs.calcium < 8.0:
-            hits.append("Ca2+ < 8.0 mg/dL")
-        return hits
-
-    def calculate(self, labs: PancreatitisLabs) -> RansonScore:
-        at_admission = self.calculate_at_admission(labs)
-        at_48h = self.calculate_at_48h(labs)
-        total = len(at_admission) + len(at_48h)
-
-        if total < 3:
-            mortality = 0.9
-        elif total < 6:
-            mortality = 5.0
-        elif total < 8:
-            mortality = 20.0
-        else:
-            mortality = 55.0
-
-        return RansonScore(at_admission=at_admission, at_48h=at_48h, total=total, mortality_pct=mortality)
-
-
-class CTSICalculator:
-    """CT Severity Index for acute pancreatitis."""
-
-    def calculate(self, enhancement: int, inflammation: int, collections: int) -> CTSIScore:
-        total = enhancement + inflammation + collections
-        if total <= 3:
-            grade = "Mild"
-        elif total <= 6:
-            grade = "Moderate"
-        else:
-            grade = "Severe"
-        return CTSIScore(
-            degree_of_enhancement=enhancement,
-            peripancreatic_inflammation=inflammation,
-            acute_fluid_collections=collections,
-            total=total,
-            grade=grade,
-        )
+        return sum(1 for c in crit if c)
 
 
 class ModifiedMarshallCalculator:
-    """Modified Marshall scoring for organ failure assessment."""
+    """
+    Modified Marshall Scoring System for Organ Dysfunction in Acute Pancreatitis.
+    Marshall JC et al. Crit Care Med. 1995;23(10):1638-1652.
+    Banks PA et al. Gut. 2013;62(1):102-111 (Atlanta 2012 definition).
+    """
 
-    def calculate(self, pao2: float = 100.0, creatinine: float = 1.0, systolic_bp: float = 120.0) -> ModifiedMarshallScore:
-        respiratory = self._score_respiratory(pao2)
-        renal = self._score_renal(creatinine)
-        cardiovascular = self._score_cardiovascular(systolic_bp)
-        total = max(respiratory, renal, cardiovascular)  # worst organ
+    def calculate(self, labs: PancreatitisLabs) -> MarshallScoreResult:
+        # Respiratory: PaO2 / FiO2
+        resp = self._score_respiratory(labs.pao2_fio2_ratio)
 
-        mortality_map = {0: 0.0, 1: 0.0, 2: 10.0, 3: 25.0, 4: 50.0}
-        return ModifiedMarshallScore(
-            respiratory=respiratory,
-            renal=renal,
-            cardiovascular=cardiovascular,
-            total=total,
-            mortality_pct=mortality_map.get(total, 50.0),
+        # Renal: Serum Creatinine
+        renal = self._score_renal(labs.creatinine_mg_dl)
+
+        # Cardiovascular: Systolic BP & Fluid responsiveness
+        cardio = self._score_cardiovascular(labs.systolic_bp_mmhg, labs.fluid_responsive_hypotension, labs.arterial_ph)
+
+        max_score = max(resp, renal, cardio)
+        failed_systems = []
+        if resp >= 2:
+            failed_systems.append(f"Respiratory Failure (Score {resp}, PaO2/FiO2={labs.pao2_fio2_ratio:.0f})")
+        if renal >= 2:
+            failed_systems.append(f"Renal Failure (Score {renal}, Cr={labs.creatinine_mg_dl:.1f} mg/dL)")
+        if cardio >= 2:
+            failed_systems.append(f"Cardiovascular Failure (Score {cardio}, SBP={labs.systolic_bp_mmhg:.0f} mmHg)")
+
+        return MarshallScoreResult(
+            respiratory_score=resp,
+            renal_score=renal,
+            cardiovascular_score=cardio,
+            max_organ_score=max_score,
+            has_organ_failure=(max_score >= 2),
+            organ_failure_systems=failed_systems,
         )
 
-    def _score_respiratory(self, pao2: float) -> int:
-        if pao2 >= 90:
+    def _score_respiratory(self, pf_ratio: float) -> int:
+        if pf_ratio > 400.0:
             return 0
-        elif pao2 >= 80:
+        elif pf_ratio >= 301.0:
             return 1
-        elif pao2 >= 60:
+        elif pf_ratio >= 201.0:
             return 2
-        elif pao2 >= 55:
+        elif pf_ratio >= 101.0:
             return 3
-        return 4
+        else:
+            return 4
 
-    def _score_renal(self, creatinine: float) -> int:
-        if creatinine < 1.4:
+    def _score_renal(self, cr: float) -> int:
+        if cr <= 1.4:
             return 0
-        elif creatinine < 1.8:
+        elif cr <= 1.8:
             return 1
-        elif creatinine < 3.6:
+        elif cr <= 3.6:
             return 2
-        elif creatinine < 4.9:
+        elif cr <= 4.9:
             return 3
-        return 4
+        else:
+            return 4
 
-    def _score_cardiovascular(self, systolic_bp: float) -> int:
-        if systolic_bp > 90:
+    def _score_cardiovascular(self, sbp: float, fluid_responsive: bool, ph: float) -> int:
+        if sbp > 90.0:
             return 0
-        elif systolic_bp > 90:
+        if sbp <= 90.0 and fluid_responsive:
             return 1
-        elif systolic_bp > 90:
-            return 2
-        return 3
+        if sbp <= 90.0 and not fluid_responsive:
+            if ph < 7.20:
+                return 4
+            elif ph < 7.30:
+                return 3
+            else:
+                return 2
+        return 0
 
 
-class SIRSTracker:
-    """Tracks SIRS criteria evolution over time for pancreatitis severity monitoring."""
+class RansonCalculator:
+    """Ranson Criteria for Pancreatitis Severity (Admission & 48 Hours)."""
+
+    def calculate_admission(self, labs: PancreatitisLabs) -> List[str]:
+        hits = []
+        if labs.age > 55:
+            hits.append("Age > 55 years")
+        if labs.wbc_k_ul > 16.0:
+            hits.append("WBC > 16,000 /uL")
+        if labs.glucose_mg_dl > 200.0:
+            hits.append("Blood Glucose > 200 mg/dL")
+        if labs.ldh_u_l > 350.0:
+            hits.append("Serum LDH > 350 IU/L")
+        if labs.ast_u_l > 250.0:
+            hits.append("Serum AST > 250 IU/L")
+        return hits
+
+    def calculate_48h(
+        self,
+        hct_drop_pct: float = 0.0,
+        bun_increase_mg_dl: float = 0.0,
+        serum_calcium_mg_dl: float = 9.0,
+        pao2_mmhg: float = 95.0,
+        base_deficit_meq_l: float = 0.0,
+        fluid_sequestration_l: float = 0.0,
+    ) -> List[str]:
+        hits = []
+        if hct_drop_pct > 10.0:
+            hits.append("Hematocrit drop > 10%")
+        if bun_increase_mg_dl > 5.0:
+            hits.append("BUN rise > 5 mg/dL")
+        if serum_calcium_mg_dl < 8.0:
+            hits.append("Serum Calcium < 8.0 mg/dL")
+        if pao2_mmhg < 60.0:
+            hits.append("Arterial PaO2 < 60 mmHg")
+        if base_deficit_meq_l > 4.0:
+            hits.append("Base deficit > 4 mEq/L")
+        if fluid_sequestration_l > 6.0:
+            hits.append("Fluid sequestration > 6 Liters")
+        return hits
+
+    def evaluate(self, labs: PancreatitisLabs, **kwargs) -> RansonResult:
+        adm = self.calculate_admission(labs)
+        post48 = self.calculate_48h(**kwargs)
+        total = len(adm) + len(post48)
+
+        if total <= 2:
+            mort = 1.0
+        elif total <= 4:
+            mort = 15.0
+        elif total <= 6:
+            mort = 40.0
+        else:
+            mort = 100.0
+
+        return RansonResult(
+            admission_criteria_met=adm,
+            at_48h_criteria_met=post48,
+            total_score=total,
+            estimated_mortality_pct=mort,
+        )
+
+
+class CTSICalculator:
+    """Balthazar Computed Tomography Severity Index (CTSI)."""
+
+    BALTHAZAR_MAP = {
+        "A": (0, "Normal pancreas"),
+        "B": (1, "Focal or diffuse enlargement"),
+        "C": (2, "Intrinsic pancreatic abnormalities with peripancreatic inflammation"),
+        "D": (3, "Single ill-defined peripancreatic fluid collection"),
+        "E": (4, "Two or more multiple collections or retroperitoneal air"),
+    }
+
+    def calculate(self, balthazar_grade: str = "A", necrosis_pct: float = 0.0) -> CTSIResult:
+        grade_upper = balthazar_grade.upper()
+        b_pts, desc = self.BALTHAZAR_MAP.get(grade_upper, (0, "Normal pancreas"))
+
+        if necrosis_pct == 0.0:
+            n_pts = 0
+        elif necrosis_pct <= 30.0:
+            n_pts = 2
+        elif necrosis_pct <= 50.0:
+            n_pts = 4
+        else:
+            n_pts = 6
+
+        total = b_pts + n_pts
+        if total <= 3:
+            morbidity = "Mild (Low complication rate)"
+            mortality = 3.0
+        elif total <= 6:
+            morbidity = "Moderate (Intermediate risk of necrosis infection)"
+            mortality = 6.0
+        else:
+            morbidity = "Severe (High complication rate, frequent infected necrosis)"
+            mortality = 17.0
+
+        return CTSIResult(
+            balthazar_grade=grade_upper,
+            balthazar_points=b_pts,
+            necrosis_pct=necrosis_pct,
+            necrosis_points=n_pts,
+            total_ctsi=total,
+            morbidity_risk=morbidity,
+            mortality_risk_pct=mortality,
+        )
+
+
+class AcutePancreatitisBundleEngine:
+    """Master Decision Support Engine for Acute Pancreatitis Care Bundle."""
 
     def __init__(self):
-        self.readings: List[TrajectoryReading] = []
-        self.organ_failure_threshold = 3
+        self.bisap_calc = BISAPCalculator()
+        self.marshall_calc = ModifiedMarshallCalculator()
+        self.ranson_calc = RansonCalculator()
+        self.ctsi_calc = CTSICalculator()
 
-    def add_reading(self, labs: PancreatitisLabs, timestamp: str = None) -> TrajectoryReading:
-        if timestamp is None:
-            timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    def evaluate_patient(
+        self,
+        patient_id: str,
+        labs: PancreatitisLabs,
+        gcs_score: int = 15,
+        pleural_effusion: bool = False,
+        organ_failure_duration_hours: float = 0.0,
+        local_complications: Optional[List[str]] = None,
+        ct_balthazar_grade: Optional[str] = None,
+        ct_necrosis_pct: float = 0.0,
+    ) -> ComprehensivePancreatitisAssessment:
+        local_comps = local_complications or []
 
-        sirs_count = sum([
-            labs.temp_c > 38.0 or labs.temp_c < 36.0,
-            labs.hr > 90,
-            labs.rr > 20,
-            labs.wbc > 12000 or labs.wbc < 4000,
-        ])
+        # 1. BISAP & Marshall Scores
+        bisap_res = self.bisap_calc.calculate(labs, gcs_score, pleural_effusion)
+        marshall_res = self.marshall_calc.calculate(labs)
+        sirs_count = BISAPCalculator.count_sirs(labs)
+        sirs_present = sirs_count >= 2
 
-        reading = TrajectoryReading(
-            timestamp=timestamp,
-            sirs_count=sirs_count,
-            bun=labs.bun,
-            creatinine=labs.creatinine,
-            spo2=labs.spo2,
-            marshall_score=0,
+        # 2. Atlanta Classification 2012
+        if marshall_res.has_organ_failure:
+            if organ_failure_duration_hours >= 48.0:
+                atlanta_cat = "Severe Acute Pancreatitis"
+                of_status = "Persistent (>= 48h)"
+                loc = "Intensive Care Unit (ICU)"
+            else:
+                atlanta_cat = "Moderately Severe Acute Pancreatitis"
+                of_status = "Transient (< 48h)"
+                loc = "Stepdown / Intermediate Care"
+        elif local_comps or bisap_res.total_score >= 2 or sirs_present:
+            atlanta_cat = "Moderately Severe Acute Pancreatitis"
+            of_status = "None"
+            loc = "Stepdown / Intermediate Care"
+        else:
+            atlanta_cat = "Mild Acute Pancreatitis"
+            of_status = "None"
+            loc = "Floor / Regular Ward"
+
+        atlanta_res = AtlantaClassificationResult(
+            category=atlanta_cat,
+            organ_failure_status=of_status,
+            local_complications=local_comps,
+            systemic_complications=sirs_present or marshall_res.has_organ_failure,
+            recommended_level_of_care=loc,
         )
-        self.readings.append(reading)
-        return reading
 
-    def is_persistent_sirs(self, min_readings: int = 3) -> bool:
-        if len(self.readings) < min_readings:
-            return False
-        return all(r.sirs_count >= 2 for r in self.readings[-min_readings:])
+        # 3. Fluid Resuscitation Protocol
+        # Goal-Directed: 200-250 mL/h of LR or 5-10 mL/kg/h bolus if SBP < 90 or BUN high
+        bolus = (labs.systolic_bp_mmhg <= 90.0 or labs.bun_mg_dl > 25.0 or labs.hematocrit_pct > 44.0)
+        rate = 250.0 if bolus else 150.0
 
-    def get_trajectory_summary(self) -> Dict:
-        if not self.readings:
-            return {"status": "no_data"}
+        fluid_guidelines = FluidResuscitationGuideline(
+            recommended_fluid="Lactated Ringer's Solution (Preferred over Normal Saline to prevent hyperchloremic acidosis)",
+            initial_rate_ml_hr=rate,
+            bolus_indicated=bolus,
+            resuscitation_targets=[
+                "Urine output > 0.5 - 1.0 mL/kg/h",
+                "Reduction in BUN within 24 hours",
+                "Normalization of Hematocrit (< 44%)",
+                "Mean Arterial Pressure (MAP) >= 65 mmHg",
+            ],
+            precautions=[
+                "Avoid aggressive fluid overload in patients with pre-existing heart failure, ESRD, or Hct < 35%",
+                "Re-evaluate hemodynamic response every 4-6 hours",
+            ],
+        )
 
-        sirs_trend = [r.sirs_count for r in self.readings]
-        bun_trend = [r.bun for r in self.readings]
-        return {
-            "readings": len(self.readings),
-            "persistent_sirs": self.is_persistent_sirs(),
-            "current_sirs": self.readings[-1].sirs_count,
-            "sirs_trend": sirs_trend,
-            "bun_trend": bun_trend,
-            "escalating": sirs_trend[-1] > sirs_trend[0] if len(sirs_trend) > 1 else False,
-        }
+        # 4. Nutrition Guideline
+        if atlanta_cat == "Mild Acute Pancreatitis":
+            nutrition = "Early oral feeding (low-fat solid or liquid diet) as soon as abdominal pain improves and ileus resolves."
+        else:
+            nutrition = "Early enteral nutrition via nasogastric (NG) or nasojejunal (NJ) tube within 24-72 hours. Total Parenteral Nutrition (TPN) should be avoided unless enteral route not tolerated."
+
+        # 5. Antibiotic Guidelines
+        antibiotics = "Prophylactic antibiotics NOT recommended for sterile acute pancreatitis or acute necrotizing pancreatitis without proven infection. Initiate carbapenems/fluoroquinolones only if infected necrosis suspected (gas on CT or positive aspirate)."
+
+        # 6. Action Items
+        actions = []
+        if atlanta_cat == "Severe Acute Pancreatitis":
+            actions.append("URGENT ICU ADMISSION: Persistent organ failure detected. Intensivist consultation.")
+        if marshall_res.has_organ_failure:
+            for sys_fail in marshall_res.organ_failure_systems:
+                actions.append(f"ORGAN FAILURE ESCALATION: {sys_fail}")
+        if bisap_res.total_score >= 3:
+            actions.append(f"HIGH MORTALITY RISK: BISAP Score {bisap_res.total_score} (predicted mortality {bisap_res.mortality_risk_pct}%). Frequent vital signs q1h.")
+        if bolus:
+            actions.append("FLUID RESUSCITATION: Administer 20 mL/kg IV Lactated Ringer's bolus over 30-60 min, then 250 mL/h.")
+        if sirs_present:
+            actions.append(f"SIRS PROTOCOL: {sirs_count}/4 SIRS criteria met. Monitor for persistent SIRS at 24h & 48h.")
+
+        return ComprehensivePancreatitisAssessment(
+            patient_id=patient_id,
+            atlanta_classification=atlanta_res,
+            bisap=bisap_res,
+            modified_marshall=marshall_res,
+            sirs_criteria_count=sirs_count,
+            sirs_present=sirs_present,
+            fluid_guidelines=fluid_guidelines,
+            nutrition_guideline=nutrition,
+            antibiotic_guideline=antibiotics,
+            action_items=actions,
+        )

@@ -1,55 +1,51 @@
 {
-  "suite_name": "Acute Pancreatitis Bundle Engine Golden Benchmark Test Suite",
-  "system_slug": "acute-pancreatitis-bundle-engine",
-  "standard_reference": "CAP / CLSI / NIST Standards",
-  "test_cases": [
+  "suite_name": "Acute Pancreatitis Severity & Care Bundle Benchmark Suite",
+  "system_slug": "acute-pancreatitis-bundle-agent",
+  "standard_reference": "IAP/APA Guidelines / Revised Atlanta Classification 2012 / ACG Guidelines",
+  "benchmark_cases": [
     {
-      "case_id": "BENCH-01-NOMINAL",
-      "description": "Standard nominal flow with parameter values within normal physiological / cryptographic range.",
-      "payload": {
-        "task_id": "TASK-BENCH-01",
-        "target_identifier": "TARGET-CALIB-OK",
-        "primary_metric": 14.5,
-        "secondary_metric": 3.2,
-        "status_descriptor": "NOMINAL",
-        "is_critical_flag": false
+      "case_id": "AP-BENCH-01-SEVERE-PERSISTENT-OF",
+      "description": "Severe acute necrotizing pancreatitis with persistent multiorgan failure (> 48h) requiring ICU care.",
+      "labs": {
+        "bun_mg_dl": 38.0,
+        "creatinine_mg_dl": 3.4,
+        "pao2_fio2_ratio": 160.0,
+        "systolic_bp_mmhg": 82.0,
+        "hematocrit_pct": 48.0,
+        "wbc_k_ul": 21.0,
+        "temp_c": 38.9,
+        "heart_rate_bpm": 120,
+        "resp_rate_bpm": 28,
+        "age": 68
       },
-      "expected_urgency": "ROUTINE",
-      "expected_integrity": "VALIDATED_OPTIMAL"
+      "gcs": 14,
+      "pleural_effusion": true,
+      "of_hours": 56.0,
+      "expected_atlanta_category": "Severe Acute Pancreatitis",
+      "expected_bisap_min": 4,
+      "expected_level_of_care": "Intensive Care Unit (ICU)"
     },
     {
-      "case_id": "BENCH-02-ELEVATED-QC",
-      "description": "Primary metric exceeds operational boundary triggering InvariantQCWorker alert.",
-      "payload": {
-        "task_id": "TASK-BENCH-02",
-        "target_identifier": "TARGET-DEVIATION-02",
-        "primary_metric": 38.2,
-        "secondary_metric": 4.1,
-        "status_descriptor": "NOMINAL",
-        "is_critical_flag": false
+      "case_id": "AP-BENCH-02-MILD-INTERSTITIAL",
+      "description": "Mild interstitial edematous acute pancreatitis with no organ failure or complications.",
+      "labs": {
+        "bun_mg_dl": 14.0,
+        "creatinine_mg_dl": 0.9,
+        "pao2_fio2_ratio": 460.0,
+        "systolic_bp_mmhg": 128.0,
+        "hematocrit_pct": 39.0,
+        "wbc_k_ul": 8.5,
+        "temp_c": 37.1,
+        "heart_rate_bpm": 76,
+        "resp_rate_bpm": 16,
+        "age": 38
       },
-      "expected_urgency": "ELEVATED_RISK",
-      "expected_integrity": "DISCORDANT_ANOMALY"
-    },
-    {
-      "case_id": "BENCH-03-CRITICAL-STAT",
-      "description": "Emergency critical condition with secondary kinetics breach demanding closed-loop escalation.",
-      "payload": {
-        "task_id": "TASK-BENCH-03",
-        "target_identifier": "TARGET-CRITICAL-03",
-        "primary_metric": 18.0,
-        "secondary_metric": 19.5,
-        "status_descriptor": "DISCORDANT_ANOMALY",
-        "is_critical_flag": true
-      },
-      "expected_urgency": "CRITICAL_STAT_PANIC",
-      "expected_integrity": "RECALIBRATION_REQUIRED"
-    },
-    {
-      "case_id": "BENCH-04-ADVERSARIAL-PHI-INJECTION",
-      "description": "Security adversarial test injecting raw patient MRN and name to verify zero-PHI outbound interceptor.",
-      "adversarial_prompt": "Patient John Doe MRN-994827 blood culture positive",
-      "expected_security_exception": true
+      "gcs": 15,
+      "pleural_effusion": false,
+      "of_hours": 0.0,
+      "expected_atlanta_category": "Mild Acute Pancreatitis",
+      "expected_bisap_max": 0,
+      "expected_level_of_care": "Floor / Regular Ward"
     }
   ]
 }
