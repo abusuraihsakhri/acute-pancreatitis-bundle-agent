@@ -1,129 +1,114 @@
-# Acute Pancreatitis Bundle Agent
+# Acute Pancreatitis Severity Classification & Bundle Care Decision Support System
 
-> **Domain:** Gastroenterology, Hepatology & Clinical Nutrition  
-> **Reference Guidelines & Standards:** `AASLD & ACG Clinical Practice Guidelines`
+A Python clinical decision support system and CLI tool for acute pancreatitis severity stratification, organ failure surveillance, and bundle care management. Implements the Revised Atlanta Classification (2012), Bedside Index for Severity in Acute Pancreatitis (BISAP), Modified Marshall Scoring System for multiorgan failure, Systemic Inflammatory Response Syndrome (SIRS) criteria, Ranson's Criteria, Balthazar CT Severity Index (CTSI), and goal-directed fluid/nutrition resuscitation protocols.
 
-<div align="center">
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Zero-PHI Guard](https://img.shields.io/badge/Guard-Zero--PHI_Outbound-blue.svg)
-![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)
-
-</div>
+Requires Python standard library only (zero external runtime dependencies).
 
 ---
 
-## 📖 What It Does
+## Features
 
-**Acute Pancreatitis Bundle Agent** is an advanced analytical and computational platform implementing Revised Atlanta Classification & 24h SIRS Resuscitation Agent.
-
-Acute Pancreatitis Clinical Decision Support & Bundle Care Protocol Engine.
-
-Clinical Frameworks:
-1. Revised Atlanta Classification 2012 (Mild, Moderately Severe, Severe).
-2. Bedside Index for Severity in Acute Pancreatitis (BISAP) Score & Mortality Stratification.
-3. Modified Marshall Scoring System for Multiorgan Failure (Respiratory, Renal, Cardiovascular).
-4. Systemic Inflammatory Response Syndrome (SIRS) Trajectory & Persistent SIRS Detection.
-5. Ranson's Criteria (Admission and 48-Hour Progression).
-6. Balthazar Computed Tomography Severity Index (CTSI) & Necrosis Assessment.
-7. Goal-Directed Fluid Resuscitation & Enteral Nutrition Bundle Guidelines.
+- **Revised Atlanta Classification (2012):** Classifies presentation into Mild (no organ failure/complications), Moderately Severe (transient organ failure < 48 hours or local/systemic complications), or Severe (persistent organ failure >= 48 hours in one or more systems).
+- **Modified Marshall Organ Failure Score:** Evaluates respiratory ($PaO_2/FiO_2$), renal (serum creatinine), and cardiovascular (systolic blood pressure/inotropic support) dysfunction with standard physiological thresholds.
+- **BISAP Score & Mortality Stratification:** Points tallied for BUN > 25 mg/dL, Impaired mental status (GCS < 15), SIRS present, Age > 60 years, and Pleural effusion.
+- **Goal-Directed Fluid Resuscitation:** Evaluates hematocrit, BUN, and urine output targets; recommends Lactated Ringer's solution protocols and warns against volume overload in renal/heart failure.
+- **Nutritional & Antibiotic Stewardship:** Outlines evidence-based guidance for early enteral feeding vs. TPN, and stewardship protocols against routine prophylactic antibiotics in sterile acute pancreatitis.
+- **Interactive Wizard & Batch CLI:** Full command-line wizard, single-patient parameterized evaluation, and batch evaluation of patient cohorts via CSV.
 
 ---
 
-## ⚙️ Key Capabilities & Algorithmic Modules
+## Installation & Requirements
 
-### 🔬 Core Algorithmic & Evaluation Engines
+- Python 3.10+ (tested on 3.10, 3.11, 3.12)
+- Zero external runtime dependencies. `pytest` is optional for running unit tests.
 
-- **`PancreatitisLabs`** — dedicated module for pancreatitis labs evaluation and state verification.
-- **`BISAPResult`** — dedicated module for b i s a p result evaluation and state verification.
-- **`MarshallScoreResult`** — dedicated module for marshall score result evaluation and state verification.
-- **`AtlantaClassificationResult`** — dedicated module for atlanta classification result evaluation and state verification.
-- **`RansonResult`** — dedicated module for ranson result evaluation and state verification.
-- **`CTSIResult`** — dedicated module for c t s i result evaluation and state verification.
-
----
-
-## 📐 Mathematical Formulation & Logic
-
-```text
-  score = sum(1 for v in criteria.values() if v)
-  elif score == 2:
-  elif score == 3:
-  max_score = max(resp, renal, cardio)
-  adm = self.calculate_admission(labs)
+```bash
+git clone https://github.com/abusuraihsakhri/acute-pancreatitis-bundle-agent.git
+cd acute-pancreatitis-bundle-agent
 ```
 
 ---
 
-## 💻 CLI Quickstart & Usage
+## CLI Usage
 
-### 1. Guided Interactive Mode
+### 1. Single Patient Evaluation
+Evaluate acute pancreatitis presentation:
 ```bash
-python cli.py
+python cli.py --evaluate --patient-id PT-001 --bun 32.0 --cr 2.2 --temp 38.8 --hr 112 --rr 26 --pao2-fio2 280 --sbp 95 --pleural-effusion --of-hours 48
+```
+Output as JSON:
+```bash
+python cli.py --evaluate --patient-id PT-001 --bun 32.0 --cr 2.2 --temp 38.8 --hr 112 --rr 26 --pao2-fio2 280 --sbp 95 --pleural-effusion --of-hours 48 --json
 ```
 
-### 2. Direct Parameterized Evaluation
+### 2. Batch Patient CSV Evaluation
+Process cohort CSV file:
 ```bash
-python cli.py --interactive <value> --evaluate <value> --batch <value> --patient-id <value>
+python cli.py -i sample.csv --json
 ```
 
-### Parameter Reference
-- `--interactive`: Specifies input measurement or parameter value.
-- `--evaluate`: Specifies input measurement or parameter value.
-- `--batch`: Specifies input measurement or parameter value.
-- `--patient-id`: Specifies input measurement or parameter value.
-- `--age`: Specifies input measurement or parameter value.
-- `--gcs`: Specifies input measurement or parameter value.
-- `--temp`: Specifies input measurement or parameter value.
-- `--hr`: Specifies input measurement or parameter value.
-- `--rr`: Specifies input measurement or parameter value.
-- `--sbp`: Specifies input measurement or parameter value.
+### 3. CT Severity Index Evaluation
+Incorporate contrast CT findings:
+```bash
+python cli.py --evaluate --patient-id PT-CT-01 --bun 26.0 --balthazar D --necrosis 30 --json
+```
 
-### Input Data Schema
-
-| Field | Description | Requirement |
-|:------|:------------|:------------|
-| `case_id` | Parameter / observation metric | Required |
-| `patient_synthetic_id` | Parameter / observation metric | Required |
-| `metric_primary` | Parameter / observation metric | Required |
-| `metric_secondary` | Parameter / observation metric | Required |
-| `is_stat` | Parameter / observation metric | Required |
-| `status_flag` | Parameter / observation metric | Required |
+### 4. Interactive Clinical Wizard
+Launch terminal clinical decision wizard:
+```bash
+python cli.py --interactive
+```
 
 ---
 
-## 🛡️ Security & Enterprise Architecture
+## Python API Quickstart
 
-* **Zero-PHI Outbound Interceptor:** Active AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers.
-* **Tamper-Evident HMAC-SHA256 Audit Trail:** Chained, cryptographically signed logs for every evaluation and state transition.
-* **Air-Gapped LLM Reasoning Adapter:** Agnostic integration for local Ollama instances (`llama3`, `mistral`), Claude 3.5 Sonnet, GPT-4o, and deterministic test mocks.
-* **Active Learning Bayesian Calibration:** Dynamic tracker updating worker reliability weights and monitoring Brier calibration drift.
-* **FastAPI & Prometheus Telemetry:** Exposes OpenAPI 3.1 REST endpoints and operational Prometheus metrics (`/metrics`).
+```python
+from pancreatitis_severity import (
+    PancreatitisLabs,
+    AcutePancreatitisBundleEngine,
+)
+
+engine = AcutePancreatitisBundleEngine()
+
+labs = PancreatitisLabs(
+    bun_mg_dl=32.0,
+    creatinine_mg_dl=2.2,
+    hematocrit_pct=47.0,
+    wbc_k_ul=18.5,
+    temp_c=38.8,
+    heart_rate_bpm=112,
+    resp_rate_bpm=26,
+    pao2_fio2_ratio=280.0,
+    systolic_bp_mmhg=95.0,
+    has_pleural_effusion=True,
+    organ_failure_duration_hours=48.0,
+)
+
+result = engine.evaluate_patient(
+    patient_id="PT-001",
+    labs=labs,
+    age=58,
+    gcs_score=14,
+)
+
+print(f"Atlanta Category: {result.atlanta_classification.category}")
+print(f"BISAP Score: {result.bisap.total_score} (Mortality: {result.bisap.mortality_risk_pct}%)")
+print(f"Organ Failure Present: {result.modified_marshall.has_organ_failure}")
+print(f"Recommended Fluid: {result.fluid_guidelines.recommended_fluid}")
+for item in result.action_items:
+    print(f" * {item}")
+```
 
 ---
 
-## 🧪 Testing & Verification
+## Running Tests
 
-Run the automated test suite:
+Run the test suite using standard `unittest` or `pytest`:
 
 ```bash
+python test_pancreas_guard.py
+# or
 pytest -v
 ```
 
-Execute high-throughput batch simulation benchmarks:
-
-```bash
-python simulator.py --tasks 1000 --concurrency 8
-```
-
----
-
-## 🐳 Container Deployment
-
-```bash
-docker build -t acute-pancreatitis-bundle-agent .
-docker run -p 8000:8000 acute-pancreatitis-bundle-agent
-```

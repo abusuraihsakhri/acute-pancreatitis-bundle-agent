@@ -208,6 +208,34 @@ class TestCLIAndBatchExecution(unittest.TestCase):
             if os.path.exists(temp_path):
                 os.remove(temp_path)
 
+    def test_cli_json_flag(self):
+        out = io.StringIO()
+        old_stdout = sys.stdout
+        sys.stdout = out
+        try:
+            code = cli.main(["--evaluate", "--patient-id", "TEST_JSON", "--bun", "32.0", "--cr", "2.5", "--json"])
+            self.assertEqual(code, 0)
+        finally:
+            sys.stdout = old_stdout
+
+        data = json.loads(out.getvalue())
+        self.assertEqual(data["patient_id"], "TEST_JSON")
+        self.assertIn("bisap", data)
+
+    def test_sample_csv_batch(self):
+        sample_path = PROJECT_ROOT / "sample.csv"
+        out = io.StringIO()
+        old_stdout = sys.stdout
+        sys.stdout = out
+        try:
+            code = cli.main(["-i", str(sample_path), "--json"])
+            self.assertEqual(code, 0)
+        finally:
+            sys.stdout = old_stdout
+
+        data = json.loads(out.getvalue())
+        self.assertEqual(len(data), 3)
+
 
 if __name__ == "__main__":
     unittest.main()
