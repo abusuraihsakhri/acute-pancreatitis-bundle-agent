@@ -12,15 +12,18 @@ Clinical Frameworks:
 7. Goal-Directed Fluid Resuscitation & Enteral Nutrition Bundle Guidelines.
 """
 
-from dataclasses import dataclass, field, asdict
-from typing import List, Dict, Optional, Tuple, Any
-import datetime
-import math
-import json
+from dataclasses import dataclass
+from typing import List, Optional
 
 
 @dataclass
 class PancreatitisLabs:
+    """Laboratory values and vitals for acute pancreatitis assessment.
+
+    All numeric fields are validated to be within physiologically plausible ranges
+    on instantiation. Raises ValueError for out-of-range values.
+    """
+
     bun_mg_dl: float = 15.0
     creatinine_mg_dl: float = 1.0
     hematocrit_pct: float = 40.0
@@ -40,6 +43,41 @@ class PancreatitisLabs:
     ast_u_l: float = 35.0
     lipase_u_l: float = 150.0
     age: int = 45
+
+    # Physiological validation ranges (min, max) — None means unbounded
+    _VALIDATION_RANGES = {
+        "bun_mg_dl": (0.0, 300.0),
+        "creatinine_mg_dl": (0.0, 30.0),
+        "hematocrit_pct": (0.0, 75.0),
+        "wbc_k_ul": (0.0, 100.0),
+        "temp_c": (25.0, 45.0),
+        "heart_rate_bpm": (0, 300),
+        "resp_rate_bpm": (0, 80),
+        "spo2_pct": (0.0, 100.0),
+        "pao2_fio2_ratio": (0.0, 800.0),
+        "systolic_bp_mmhg": (0.0, 300.0),
+        "arterial_ph": (6.5, 8.0),
+        "glucose_mg_dl": (0.0, 1200.0),
+        "calcium_mg_dl": (0.0, 20.0),
+        "albumin_g_dl": (0.0, 8.0),
+        "ldh_u_l": (0.0, 5000.0),
+        "ast_u_l": (0.0, 5000.0),
+        "lipase_u_l": (0.0, 10000.0),
+        "age": (0, 150),
+    }
+
+    def __post_init__(self):
+        """Validate all numeric fields are within physiological ranges."""
+        for field_name, (lo, hi) in self._VALIDATION_RANGES.items():
+            value = getattr(self, field_name)
+            if value is None:
+                continue
+            if not isinstance(value, (int, float)):
+                raise TypeError(f"{field_name} must be numeric, got {type(value).__name__}")
+            if value < lo or value > hi:
+                raise ValueError(
+                    f"{field_name}={value} is outside valid range [{lo}, {hi}]"
+                )
 
 
 @dataclass

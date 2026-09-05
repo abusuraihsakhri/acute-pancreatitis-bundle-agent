@@ -102,6 +102,22 @@ for item in result.action_items:
 
 ---
 
+## Input Validation & Safety
+
+All laboratory values and vital signs are validated against physiological ranges on instantiation. Out-of-range values raise `ValueError` with a descriptive message:
+
+```python
+from pancreatitis_severity import PancreatitisLabs
+
+# This will raise ValueError: bun_mg_dl=-5.0 is outside valid range [0.0, 300.0]
+labs = PancreatitisLabs(bun_mg_dl=-5.0)
+```
+
+The CLI also includes:
+- **Path traversal protection**: Output files (`--output`) must reside within the working directory.
+- **Graceful error handling**: Malformed CSV/JSON batch files produce clear error messages and exit code 1.
+- **Per-field validation**: Each lab value in batch files is validated before processing.
+
 ## Running Tests
 
 Run the test suite using standard `unittest` or `pytest`:
@@ -111,4 +127,6 @@ python test_pancreas_guard.py
 # or
 pytest -v
 ```
+
+The test suite includes 28 tests covering clinical calculations, CLI execution, input validation, and security controls.
 

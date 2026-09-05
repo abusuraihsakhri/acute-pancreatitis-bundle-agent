@@ -237,5 +237,88 @@ class TestCLIAndBatchExecution(unittest.TestCase):
         self.assertEqual(len(data), 3)
 
 
+class TestInputValidation(unittest.TestCase):
+    """Tests for physiological range validation in PancreatitisLabs."""
+
+    def test_negative_bun_rejected(self):
+        with self.assertRaises(ValueError):
+            PancreatitisLabs(bun_mg_dl=-5.0)
+
+    def test_extreme_age_rejected(self):
+        with self.assertRaises(ValueError):
+            PancreatitisLabs(age=200)
+
+    def test_temperature_out_of_range(self):
+        with self.assertRaises(ValueError):
+            PancreatitisLabs(temp_c=50.0)
+
+    def test_phys_valid_values_accepted(self):
+        labs = PancreatitisLabs(bun_mg_dl=35.0, age=65, temp_c=38.5, heart_rate_bpm=110)
+        self.assertEqual(labs.bun_mg_dl, 35.0)
+        self.assertEqual(labs.age, 65)
+
+    def test_default_values_valid(self):
+        labs = PancreatitisLabs()
+        self.assertEqual(labs.bun_mg_dl, 15.0)
+        self.assertEqual(labs.age, 45)
+
+
+class TestCLISecurityAndErrors(unittest.TestCase):
+    """Tests for CLI path traversal prevention and error handling."""
+
+    def test_path_traversal_batch_rejected(self):
+        """Batch with non-existent path returns error code 1."""
+        out = io.StringIO()
+        old_stdout = sys.stdout
+        sys.stdout = out
+        try:
+            code = cli.main(["--batch", "../../../etc/passwd", "--format", "json"])
+            self.assertEqual(code, 1)
+        finally:
+            sys.stdout = old_stdout
+
+    def test_path_traversal_output_rejected(self):
+        """Output path escaping working directory is rejected."""
+        out = io.StringIO()
+        old_stdout = sys.stdout
+        sys.stdout = out
+        try:
+            code = cli.main([
+                "--evaluate", "--patient-id", "PT-01",
+                "--output", "../../tmp/evil.txt"
+            ])
+            self.assertEqual(code, 1)
+        finally:
+            sys.stdout = old_stdout
+
+    def test_malformed_json_batch(self):
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write("{invalid json content")
+            temp_path = f.name
+
+        try:
+            out = io.StringIO()
+            old_stdout = sys.stdout
+            sys.stdout = out
+            try:
+                code = cli.main(["--batch", temp_path, "--format", "json"])
+                self.assertEqual(code, 1)
+            finally:
+                sys.stdout = old_stdout
+        finally:
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+
+    def test_nonexistent_batch_file(self):
+        out = io.StringIO()
+        old_stdout = sys.stdout
+        sys.stdout = out
+        try:
+            code = cli.main(["--batch", "nonexistent_file.csv", "--format", "json"])
+            self.assertEqual(code, 1)
+        finally:
+            sys.stdout = old_stdout
+
+
 if __name__ == "__main__":
     unittest.main()

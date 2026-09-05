@@ -6,6 +6,7 @@ Command Line Interface for Acute Pancreatitis Clinical Decision Support & Bundle
 import argparse
 import csv
 import json
+import os
 import sys
 from pathlib import Path
 from typing import List, Optional
@@ -18,6 +19,62 @@ from pancreatitis_severity import (
     RansonCalculator,
     CTSICalculator,
 )
+
+
+def _resolve_safe_path(file_path: str, must_exist: bool = False) -> Path:
+    """Resolve a user-supplied path safely, preventing path traversal.
+
+    The path must resolve within the current working directory (or an absolute
+    path that is already under it). Raises ValueError if the path escapes.
+    """
+    path = Path(file_path).resolve()
+    cwd = Path.cwd().resolve()
+
+    if must_exist and not path.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+
+    # Prevent path traversal: resolved path must be under cwd
+    try:
+        path.relative_to(cwd)
+    except ValueError:
+        raise ValueError(
+            f"Path '{file_path}' escapes the working directory. "
+            "Only paths within the project directory are allowed."
+        )
+
+    return path
+
+
+def _resolve_input_path(file_path: str) -> Path:
+    """Resolve an input file path, checking it exists and is a file."""
+    path = Path(file_path).resolve()
+    if not path.exists():
+        raise FileNotFoundError(f"File not found: {file_path}")
+    if not path.is_file():
+        raise ValueError(f"Path is not a file: {file_path}")
+    return path
+
+
+def _safe_float(value: str, field_name: str, min_val: float, max_val: float) -> float:
+    """Parse and validate a float within an inclusive range."""
+    try:
+        f = float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be a number: '{value}'") from exc
+    if f < min_val or f > max_val:
+        raise ValueError(f"{field_name}={f} is outside valid range [{min_val}, {max_val}]")
+    return f
+
+
+def _safe_int(value: str, field_name: str, min_val: int, max_val: int) -> int:
+    """Parse and validate an int within an inclusive range."""
+    try:
+        i = int(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be an integer: '{value}'") from exc
+    if i < min_val or i > max_val:
+        raise ValueError(f"{field_name}={i} is outside valid range [{min_val}, {max_val}]")
+    return i
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -152,54 +209,77 @@ def main(argv=None) -> int:
     engine = AcutePancreatitisBundleEngine()
 
     if args.batch:
-        path = Path(args.batch)
+        try:
+            path = _resolve_input_path(args.batch)
+        except (FileNotFoundError, ValueError) as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
         evaluations = []
         if path.suffix.lower() == ".json":
-            records = json.loads(path.read_text(encoding="utf-8"))
-            for r in records:
-                labs = PancreatitisLabs(
-                    bun_mg_dl=float(r.get("bun", 15.0)),
-                    creatinine_mg_dl=float(r.get("cr", 1.0)),
-                    hematocrit_pct=float(r.get("hct", 40.0)),
-                    wbc_k_ul=float(r.get("wbc", 9.0)),
-                    temp_c=float(r.get("temp", 37.0)),
-                    heart_rate_bpm=int(r.get("hr", 75)),
-                    resp_rate_bpm=int(r.get("rr", 16)),
-                    pao2_fio2_ratio=float(r.get("pao2_fio2", 450.0)),
-                    systolic_bp_mmhg=float(r.get("sbp", 120.0)),
-                    age=int(r.get("age", 45)),
-                )
-                ev = engine.evaluate_patient(
-                    patient_id=str(r.get("patient_id", "PT")),
-                    labs=labs,
-                    gcs_score=int(r.get("gcs", 15)),
-                    pleural_effusion=bool(r.get("pleural_effusion", False)),
-                    organ_failure_duration_hours=float(r.get("of_hours", 0.0)),
-                )
-                evaluations.append(ev)
-        else:
-            with open(path, mode="r", encoding="utf-8-sig") as f:
-                reader = csv.DictReader(f)
-                for r in reader:
+            try:
+                records = json.loads(path.read_text(encoding="utf-8"))
+            except (json.JSONDecodeError, OSError) as exc:
+                print(f"Error reading JSON file: {exc}", file=sys.stderr)
+                return 1
+            if not isinstance(records, list):
+                print("Error: JSON file must contain a list of patient records", file=sys.stderr)
+                return 1
+            for idx, r in enumerate(records):
+                try:
                     labs = PancreatitisLabs(
-                        bun_mg_dl=float(r.get("bun", 15.0)),
-                        creatinine_mg_dl=float(r.get("cr", 1.0)),
-                        hematocrit_pct=float(r.get("hct", 40.0)),
-                        wbc_k_ul=float(r.get("wbc", 9.0)),
-                        temp_c=float(r.get("temp", 37.0)),
-                        heart_rate_bpm=int(r.get("hr", 75)),
-                        resp_rate_bpm=int(r.get("rr", 16)),
-                        pao2_fio2_ratio=float(r.get("pao2_fio2", 450.0)),
-                        systolic_bp_mmhg=float(r.get("sbp", 120.0)),
-                        age=int(r.get("age", 45)),
+                        bun_mg_dl=_safe_float(r.get("bun", 15.0), "bun", 0.0, 300.0),
+                        creatinine_mg_dl=_safe_float(r.get("cr", 1.0), "cr", 0.0, 30.0),
+                        hematocrit_pct=_safe_float(r.get("hct", 40.0), "hct", 0.0, 75.0),
+                        wbc_k_ul=_safe_float(r.get("wbc", 9.0), "wbc", 0.0, 100.0),
+                        temp_c=_safe_float(r.get("temp", 37.0), "temp", 25.0, 45.0),
+                        heart_rate_bpm=_safe_int(r.get("hr", 75), "hr", 0, 300),
+                        resp_rate_bpm=_safe_int(r.get("rr", 16), "rr", 0, 80),
+                        pao2_fio2_ratio=_safe_float(r.get("pao2_fio2", 450.0), "pao2_fio2", 0.0, 800.0),
+                        systolic_bp_mmhg=_safe_float(r.get("sbp", 120.0), "sbp", 0.0, 300.0),
+                        age=_safe_int(r.get("age", 45), "age", 0, 150),
                     )
                     ev = engine.evaluate_patient(
                         patient_id=str(r.get("patient_id", "PT")),
                         labs=labs,
-                        gcs_score=int(r.get("gcs", 15)),
+                        gcs_score=_safe_int(r.get("gcs", 15), "gcs", 3, 15),
                         pleural_effusion=bool(r.get("pleural_effusion", False)),
+                        organ_failure_duration_hours=_safe_float(r.get("of_hours", 0.0), "of_hours", 0.0, 10000.0),
                     )
                     evaluations.append(ev)
+                except (ValueError, TypeError) as exc:
+                    print(f"Error in record {idx + 1}: {exc}", file=sys.stderr)
+                    return 1
+        else:
+            try:
+                with open(path, mode="r", encoding="utf-8-sig") as f:
+                    reader = csv.DictReader(f)
+                    for idx, r in enumerate(reader):
+                        try:
+                            labs = PancreatitisLabs(
+                                bun_mg_dl=_safe_float(r.get("bun", 15.0), "bun", 0.0, 300.0),
+                                creatinine_mg_dl=_safe_float(r.get("cr", 1.0), "cr", 0.0, 30.0),
+                                hematocrit_pct=_safe_float(r.get("hct", 40.0), "hct", 0.0, 75.0),
+                                wbc_k_ul=_safe_float(r.get("wbc", 9.0), "wbc", 0.0, 100.0),
+                                temp_c=_safe_float(r.get("temp", 37.0), "temp", 25.0, 45.0),
+                                heart_rate_bpm=_safe_int(r.get("hr", 75), "hr", 0, 300),
+                                resp_rate_bpm=_safe_int(r.get("rr", 16), "rr", 0, 80),
+                                pao2_fio2_ratio=_safe_float(r.get("pao2_fio2", 450.0), "pao2_fio2", 0.0, 800.0),
+                                systolic_bp_mmhg=_safe_float(r.get("sbp", 120.0), "sbp", 0.0, 300.0),
+                                age=_safe_int(r.get("age", 45), "age", 0, 150),
+                            )
+                            ev = engine.evaluate_patient(
+                                patient_id=str(r.get("patient_id", "PT")),
+                                labs=labs,
+                                gcs_score=_safe_int(r.get("gcs", 15), "gcs", 3, 15),
+                                pleural_effusion=bool(r.get("pleural_effusion", False)),
+                            )
+                            evaluations.append(ev)
+                        except (ValueError, TypeError) as exc:
+                            print(f"Error in CSV row {idx + 1}: {exc}", file=sys.stderr)
+                            return 1
+            except OSError as exc:
+                print(f"Error reading CSV file: {exc}", file=sys.stderr)
+                return 1
 
         if args.format == "json":
             out_str = json.dumps([e.__dict__ for e in evaluations], default=lambda o: o.__dict__, indent=2)
@@ -214,7 +294,12 @@ def main(argv=None) -> int:
             out_str = "\n".join(out_lines)
 
         if args.output:
-            Path(args.output).write_text(out_str, encoding="utf-8")
+            try:
+                out_path = _resolve_safe_path(args.output, must_exist=False)
+            except ValueError as exc:
+                print(f"Error: {exc}", file=sys.stderr)
+                return 1
+            out_path.write_text(out_str, encoding="utf-8")
         else:
             print(out_str)
         return 0
@@ -264,7 +349,12 @@ def main(argv=None) -> int:
             out_str += f"    * {act}\n"
 
     if args.output:
-        Path(args.output).write_text(out_str, encoding="utf-8")
+        try:
+            out_path = _resolve_safe_path(args.output, must_exist=False)
+        except ValueError as exc:
+            print(f"Error: {exc}", file=sys.stderr)
+            return 1
+        out_path.write_text(out_str, encoding="utf-8")
     else:
         print(out_str)
 
