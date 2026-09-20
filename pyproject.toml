@@ -1,27 +1,35 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "acute-pancreatitis-bundle-engine"
-version = "2.0.0"
-description = "PancreasGuard: Revised Atlanta Severity & Goal-Directed Hydration Engine"
+version = "2.1.0"
+description = "Acute pancreatitis severity and supportive-care calculators"
 readme = "README.md"
-authors = [{ name = "Dr. Abu Suraih Sakhri", email = "abusuraih@example.com" }]
-license = { text = "MIT" }
+authors = [{ name = "Abu Suraih Sakhri" }]
+license = "MIT"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Scientific/Engineering :: Medical Science Apps.",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = []
 
+[project.optional-dependencies]
+test = ["pytest>=8"]
+
 [project.scripts]
-acute-pancreatitis-bundle-engine = "acute_pancreatitis_bundle_agent.cli:main"
+pancreatitis-bundle = "cli:main"
+acute-pancreatitis-bundle-engine = "cli:main"
 
 [project.urls]
-Homepage = "https://github.com/abusuraihsakhri/acute-pancreatitis-bundle-engine"
-Repository = "https://github.com/abusuraihsakhri/acute-pancreatitis-bundle-engine.git"
+Homepage = "https://github.com/abusuraihsakhri/acute-pancreatitis-bundle-agent"
+Repository = "https://github.com/abusuraihsakhri/acute-pancreatitis-bundle-agent.git"
+
+[tool.setuptools]
+py-modules = ["cli", "pancreatitis_severity"]
+
+[tool.setuptools.packages.find]
+include = ["acute_pancreatitis_bundle_agent*"]

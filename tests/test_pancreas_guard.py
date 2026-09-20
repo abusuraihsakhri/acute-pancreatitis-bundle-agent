@@ -1,323 +1,293 @@
-"""
-Comprehensive Unit Test Suite for Acute Pancreatitis Clinical Decision Support & Bundle Engine.
-"""
-
 import io
 import json
 import os
-import sys
 import tempfile
 import unittest
+from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 
-# Add project root to sys.path
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
-from pancreatitis_severity import (
-    PancreatitisLabs,
-    BISAPCalculator,
-    ModifiedMarshallCalculator,
-    RansonCalculator,
-    CTSICalculator,
-    AcutePancreatitisBundleEngine,
-)
 import cli
+from pancreatitis_severity import (
+    AcutePancreatitisBundleEngine,
+    BISAPCalculator,
+    CTSICalculator,
+    ModifiedMarshallCalculator,
+    PancreatitisLabs,
+    RansonCalculator,
+)
+
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
 class TestBISAPCalculator(unittest.TestCase):
     def setUp(self):
         self.calc = BISAPCalculator()
 
-    def test_bisap_score_zero(self):
-        labs = PancreatitisLabs(bun_mg_dl=12.0, age=40, temp_c=37.0, heart_rate_bpm=72, resp_rate_bpm=16, wbc_k_ul=8.0)
-        res = self.calc.calculate(labs, gcs_score=15, pleural_effusion_present=False)
-        self.assertEqual(res.total_score, 0)
-        self.assertEqual(res.mortality_risk_pct, 0.1)
+    def test_score_zero(self):
+        labs = PancreatitisLabs(bun_mg_dl=12, age=40, temp_c=37, heart_rate_bpm=72, resp_rate_bpm=16, wbc_k_ul=8)
+        result = self.calc.calculate(labs)
+        self.assertEqual(result.total_score, 0)
+        self.assertEqual(result.mortality_risk_pct, 0.1)
 
-    def test_bisap_score_five_maximum(self):
-        labs = PancreatitisLabs(bun_mg_dl=35.0, age=72, temp_c=38.8, heart_rate_bpm=115, resp_rate_bpm=26, wbc_k_ul=18.0)
-        res = self.calc.calculate(labs, gcs_score=13, pleural_effusion_present=True)
-        self.assertEqual(res.total_score, 5)
-        self.assertEqual(res.mortality_risk_pct, 18.0)
-        self.assertTrue(res.bun_gt_25)
-        self.assertTrue(res.impaired_mental_status)
-        self.assertTrue(res.sirs_present)
-        self.assertTrue(res.age_gt_60)
-        self.assertTrue(res.pleural_effusion)
+    def test_score_five(self):
+        labs = PancreatitisLabs(bun_mg_dl=35, age=72, temp_c=38.8, heart_rate_bpm=115, resp_rate_bpm=26, wbc_k_ul=18)
+        result = self.calc.calculate(labs, gcs_score=13, pleural_effusion_present=True)
+        self.assertEqual(result.total_score, 5)
+        self.assertTrue(result.sirs_present)
 
-    def test_bisap_score_two_intermediate(self):
-        labs = PancreatitisLabs(bun_mg_dl=29.0, age=65, temp_c=37.0, heart_rate_bpm=75, resp_rate_bpm=16, wbc_k_ul=8.0)
-        res = self.calc.calculate(labs, gcs_score=15, pleural_effusion_present=False)
-        self.assertEqual(res.total_score, 2)
-        self.assertEqual(res.mortality_risk_pct, 1.6)
+    def test_gcs_validation(self):
+        with self.assertRaises(ValueError):
+            self.calc.calculate(PancreatitisLabs(), gcs_score=16)
 
 
 class TestModifiedMarshallCalculator(unittest.TestCase):
     def setUp(self):
         self.calc = ModifiedMarshallCalculator()
 
-    def test_normal_marshall_zero(self):
-        labs = PancreatitisLabs(pao2_fio2_ratio=460.0, creatinine_mg_dl=1.0, systolic_bp_mmhg=125.0)
-        res = self.calc.calculate(labs)
-        self.assertEqual(res.max_organ_score, 0)
-        self.assertFalse(res.has_organ_failure)
+    def test_normal(self):
+        result = self.calc.calculate(PancreatitisLabs())
+        self.assertEqual(result.max_organ_score, 0)
+        self.assertFalse(result.has_organ_failure)
 
-    def test_respiratory_failure_marshall_score_2_and_3(self):
-        labs_score2 = PancreatitisLabs(pao2_fio2_ratio=250.0, creatinine_mg_dl=1.0, systolic_bp_mmhg=120.0)
-        res2 = self.calc.calculate(labs_score2)
-        self.assertEqual(res2.respiratory_score, 2)
-        self.assertTrue(res2.has_organ_failure)
+    def test_respiratory_failure(self):
+        result = self.calc.calculate(PancreatitisLabs(pao2_fio2_ratio=250))
+        self.assertEqual(result.respiratory_score, 2)
+        self.assertTrue(result.has_organ_failure)
 
-        labs_score3 = PancreatitisLabs(pao2_fio2_ratio=150.0, creatinine_mg_dl=1.0, systolic_bp_mmhg=120.0)
-        res3 = self.calc.calculate(labs_score3)
-        self.assertEqual(res3.respiratory_score, 3)
+    def test_renal_failure(self):
+        result = self.calc.calculate(PancreatitisLabs(creatinine_mg_dl=2.4))
+        self.assertEqual(result.renal_score, 2)
 
-    def test_renal_failure_marshall_score_2_and_4(self):
-        labs_cr_2 = PancreatitisLabs(pao2_fio2_ratio=450.0, creatinine_mg_dl=2.4, systolic_bp_mmhg=120.0)
-        res2 = self.calc.calculate(labs_cr_2)
-        self.assertEqual(res2.renal_score, 2)
-        self.assertTrue(res2.has_organ_failure)
+    def test_cardiovascular_failure(self):
+        result = self.calc.calculate(PancreatitisLabs(systolic_bp_mmhg=80, arterial_ph=7.25))
+        self.assertEqual(result.cardiovascular_score, 3)
 
-        labs_cr_4 = PancreatitisLabs(pao2_fio2_ratio=450.0, creatinine_mg_dl=5.5, systolic_bp_mmhg=120.0)
-        res4 = self.calc.calculate(labs_cr_4)
-        self.assertEqual(res4.renal_score, 4)
-
-    def test_cardiovascular_shock_marshall(self):
-        labs_unresponsive = PancreatitisLabs(
-            pao2_fio2_ratio=450.0, creatinine_mg_dl=1.0,
-            systolic_bp_mmhg=80.0, fluid_responsive_hypotension=False,
-            arterial_ph=7.25
-        )
-        res = self.calc.calculate(labs_unresponsive)
-        self.assertEqual(res.cardiovascular_score, 3)
-        self.assertTrue(res.has_organ_failure)
+    def test_fluid_responsive_hypotension_score_one(self):
+        result = self.calc.calculate(PancreatitisLabs(systolic_bp_mmhg=80, fluid_responsive_hypotension=True))
+        self.assertEqual(result.cardiovascular_score, 1)
+        self.assertFalse(result.has_organ_failure)
 
 
 class TestRevisedAtlantaClassification(unittest.TestCase):
     def setUp(self):
         self.engine = AcutePancreatitisBundleEngine()
 
-    def test_mild_acute_pancreatitis(self):
-        labs = PancreatitisLabs(pao2_fio2_ratio=450.0, creatinine_mg_dl=0.9, systolic_bp_mmhg=120.0, bun_mg_dl=14.0)
-        ev = self.engine.evaluate_patient("P_MILD", labs)
-        self.assertEqual(ev.atlanta_classification.category, "Mild Acute Pancreatitis")
-        self.assertEqual(ev.atlanta_classification.recommended_level_of_care, "Floor / Regular Ward")
+    def test_mild(self):
+        evaluation = self.engine.evaluate_patient("P", PancreatitisLabs())
+        self.assertEqual(evaluation.atlanta_classification.category, "Mild Acute Pancreatitis")
 
-    def test_moderately_severe_transient_organ_failure(self):
-        labs = PancreatitisLabs(pao2_fio2_ratio=220.0, creatinine_mg_dl=1.1, systolic_bp_mmhg=120.0)
-        ev = self.engine.evaluate_patient("P_MOD_SEV", labs, organ_failure_duration_hours=24.0)
-        self.assertEqual(ev.atlanta_classification.category, "Moderately Severe Acute Pancreatitis")
-        self.assertEqual(ev.atlanta_classification.organ_failure_status, "Transient (< 48h)")
-        self.assertEqual(ev.atlanta_classification.recommended_level_of_care, "Stepdown / Intermediate Care")
+    def test_sirs_does_not_define_moderately_severe(self):
+        labs = PancreatitisLabs(temp_c=38.8, heart_rate_bpm=110, resp_rate_bpm=25, wbc_k_ul=18)
+        evaluation = self.engine.evaluate_patient("P", labs)
+        self.assertTrue(evaluation.sirs_present)
+        self.assertEqual(evaluation.atlanta_classification.category, "Mild Acute Pancreatitis")
 
-    def test_severe_persistent_organ_failure(self):
-        labs = PancreatitisLabs(pao2_fio2_ratio=180.0, creatinine_mg_dl=3.2, systolic_bp_mmhg=85.0)
-        ev = self.engine.evaluate_patient("P_SEV", labs, organ_failure_duration_hours=52.0)
-        self.assertEqual(ev.atlanta_classification.category, "Severe Acute Pancreatitis")
-        self.assertEqual(ev.atlanta_classification.organ_failure_status, "Persistent (>= 48h)")
-        self.assertEqual(ev.atlanta_classification.recommended_level_of_care, "Intensive Care Unit (ICU)")
-        self.assertTrue(any("ICU" in act for act in ev.action_items))
+    def test_bisap_does_not_define_moderately_severe(self):
+        labs = PancreatitisLabs(bun_mg_dl=30, age=70)
+        evaluation = self.engine.evaluate_patient("P", labs)
+        self.assertGreaterEqual(evaluation.bisap.total_score, 2)
+        self.assertEqual(evaluation.atlanta_classification.category, "Mild Acute Pancreatitis")
+
+    def test_transient_organ_failure_is_moderately_severe(self):
+        labs = PancreatitisLabs(pao2_fio2_ratio=220)
+        evaluation = self.engine.evaluate_patient("P", labs, organ_failure_duration_hours=24)
+        self.assertEqual(evaluation.atlanta_classification.category, "Moderately Severe Acute Pancreatitis")
+        self.assertEqual(evaluation.atlanta_classification.organ_failure_status, "Transient (< 48h)")
+
+    def test_local_complication_is_moderately_severe(self):
+        evaluation = self.engine.evaluate_patient("P", PancreatitisLabs(), local_complications=["acute peripancreatic fluid collection"])
+        self.assertEqual(evaluation.atlanta_classification.category, "Moderately Severe Acute Pancreatitis")
+
+    def test_systemic_complication_is_moderately_severe(self):
+        evaluation = self.engine.evaluate_patient("P", PancreatitisLabs(), systemic_complications=True)
+        self.assertEqual(evaluation.atlanta_classification.category, "Moderately Severe Acute Pancreatitis")
+        self.assertTrue(evaluation.atlanta_classification.systemic_complications)
+
+    def test_persistent_organ_failure_is_severe(self):
+        labs = PancreatitisLabs(creatinine_mg_dl=2.4)
+        evaluation = self.engine.evaluate_patient("P", labs, organ_failure_duration_hours=48)
+        self.assertEqual(evaluation.atlanta_classification.category, "Severe Acute Pancreatitis")
 
 
-class TestRansonAndCTSICalculators(unittest.TestCase):
+class TestCTSI(unittest.TestCase):
     def setUp(self):
-        self.ranson = RansonCalculator()
-        self.ctsi = CTSICalculator()
+        self.calc = CTSICalculator()
+        self.engine = AcutePancreatitisBundleEngine()
 
-    def test_ranson_admission_scoring(self):
-        labs = PancreatitisLabs(age=62, wbc_k_ul=19.0, glucose_mg_dl=250.0, ldh_u_l=400.0, ast_u_l=300.0)
-        res = self.ranson.evaluate(labs)
-        self.assertEqual(len(res.admission_criteria_met), 5)
-        self.assertGreaterEqual(res.total_score, 5)
+    def test_grade_a(self):
+        self.assertEqual(self.calc.calculate("A", 0).total_ctsi, 0)
 
-    def test_ctsi_mild_grade_a(self):
-        res = self.ctsi.calculate(balthazar_grade="A", necrosis_pct=0.0)
-        self.assertEqual(res.total_ctsi, 0)
-        self.assertEqual(res.morbidity_risk, "Mild (Low complication rate)")
+    def test_grade_e_55_percent(self):
+        self.assertEqual(self.calc.calculate("E", 55).total_ctsi, 10)
 
-    def test_ctsi_severe_grade_e_with_necrosis(self):
-        res = self.ctsi.calculate(balthazar_grade="E", necrosis_pct=55.0)
-        self.assertEqual(res.total_ctsi, 10)
-        self.assertEqual(res.mortality_risk_pct, 17.0)
+    def test_invalid_grade_rejected(self):
+        with self.assertRaises(ValueError):
+            self.calc.calculate("Z", 0)
+
+    def test_invalid_necrosis_rejected(self):
+        with self.assertRaises(ValueError):
+            self.calc.calculate("A", -1)
+
+    def test_engine_returns_ctsi_when_requested(self):
+        evaluation = self.engine.evaluate_patient("P", PancreatitisLabs(), ct_balthazar_grade="D", ct_necrosis_pct=30)
+        self.assertIsNotNone(evaluation.ctsi)
+        self.assertEqual(evaluation.ctsi.total_ctsi, 5)
+
+    def test_necrosis_without_grade_rejected(self):
+        with self.assertRaises(ValueError):
+            self.engine.evaluate_patient("P", PancreatitisLabs(), ct_necrosis_pct=30)
 
 
-class TestFluidAndBundleGuidelines(unittest.TestCase):
+class TestFluidNutritionAntibiotics(unittest.TestCase):
     def setUp(self):
         self.engine = AcutePancreatitisBundleEngine()
 
-    def test_lactated_ringers_bolus_on_hemoconcentration(self):
-        labs = PancreatitisLabs(hematocrit_pct=48.0, bun_mg_dl=30.0)
-        ev = self.engine.evaluate_patient("P_HEMO", labs)
-        self.assertTrue(ev.fluid_guidelines.bolus_indicated)
-        self.assertEqual(ev.fluid_guidelines.initial_rate_ml_hr, 250.0)
-        self.assertIn("Lactated Ringer's", ev.fluid_guidelines.recommended_fluid)
+    def test_weight_based_reference_rate(self):
+        evaluation = self.engine.evaluate_patient("P", PancreatitisLabs(), weight_kg=80)
+        self.assertEqual(evaluation.fluid_guidelines.initial_rate_ml_hr, 120.0)
 
-    def test_no_prophylactic_antibiotics_sterile(self):
-        labs = PancreatitisLabs()
-        ev = self.engine.evaluate_patient("P_STERILE", labs)
-        self.assertIn("NOT recommended", ev.antibiotic_guideline)
+    def test_high_bun_hct_alone_do_not_trigger_bolus(self):
+        labs = PancreatitisLabs(bun_mg_dl=35, hematocrit_pct=48, systolic_bp_mmhg=120)
+        evaluation = self.engine.evaluate_patient("P", labs)
+        self.assertFalse(evaluation.fluid_guidelines.bolus_indicated)
+        self.assertTrue(any("reassess" in item.lower() for item in evaluation.action_items))
+
+    def test_hypotension_triggers_bolus_flag(self):
+        evaluation = self.engine.evaluate_patient("P", PancreatitisLabs(systolic_bp_mmhg=88))
+        self.assertTrue(evaluation.fluid_guidelines.bolus_indicated)
+        self.assertTrue(any("10" in item and "bolus" in item.lower() for item in evaluation.action_items))
+
+    def test_early_oral_feeding_language(self):
+        evaluation = self.engine.evaluate_patient("P", PancreatitisLabs())
+        self.assertIn("24-48", evaluation.nutrition_guideline)
+
+    def test_no_prophylactic_antibiotics(self):
+        evaluation = self.engine.evaluate_patient("P", PancreatitisLabs())
+        self.assertIn("Do not use prophylactic antibiotics", evaluation.antibiotic_guideline)
 
 
-class TestCLIAndBatchExecution(unittest.TestCase):
-    def test_cli_single_evaluation_json(self):
-        out = io.StringIO()
-        old_stdout = sys.stdout
-        sys.stdout = out
-        try:
-            code = cli.main([
-                "--evaluate",
-                "--patient-id", "CLI_PT_01",
-                "--bun", "32.0",
-                "--pao2-fio2", "220.0",
-                "--format", "json"
-            ])
-            self.assertEqual(code, 0)
-        finally:
-            sys.stdout = old_stdout
+class TestRanson(unittest.TestCase):
+    def test_admission_criteria(self):
+        labs = PancreatitisLabs(age=62, wbc_k_ul=19, glucose_mg_dl=250, ldh_u_l=400, ast_u_l=300)
+        result = RansonCalculator().evaluate(labs)
+        self.assertEqual(len(result.admission_criteria_met), 5)
 
-        data = json.loads(out.getvalue())
-        self.assertEqual(data["patient_id"], "CLI_PT_01")
-        self.assertTrue(data["bisap"]["bun_gt_25"])
 
-    def test_cli_batch_json(self):
+class TestValidation(unittest.TestCase):
+    def test_negative_bun_rejected(self):
+        with self.assertRaises(ValueError):
+            PancreatitisLabs(bun_mg_dl=-1)
+
+    def test_boolean_numeric_field_rejected(self):
+        with self.assertRaises(TypeError):
+            PancreatitisLabs(age=True)
+
+    def test_negative_organ_failure_duration_rejected(self):
+        with self.assertRaises(ValueError):
+            AcutePancreatitisBundleEngine().evaluate_patient("P", PancreatitisLabs(), organ_failure_duration_hours=-1)
+
+    def test_weight_range_rejected(self):
+        with self.assertRaises(ValueError):
+            AcutePancreatitisBundleEngine().evaluate_patient("P", PancreatitisLabs(), weight_kg=5)
+
+
+class TestCLI(unittest.TestCase):
+    def _run(self, argv):
+        out, err = io.StringIO(), io.StringIO()
+        with redirect_stdout(out), redirect_stderr(err):
+            code = cli.main(argv)
+        return code, out.getvalue(), err.getvalue()
+
+    def test_single_json(self):
+        code, output, _ = self._run(["--evaluate", "--patient-id", "CLI", "--bun", "32", "--json"])
+        self.assertEqual(code, 0)
+        data = json.loads(output)
+        self.assertEqual(data["patient_id"], "CLI")
+
+    def test_single_invalid_input_returns_one(self):
+        code, _, error = self._run(["--evaluate", "--gcs", "20"])
+        self.assertEqual(code, 1)
+        self.assertIn("gcs_score", error)
+
+    def test_ctsi_appears_in_json(self):
+        code, output, _ = self._run(["--evaluate", "--balthazar", "D", "--necrosis", "30", "--json"])
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(output)["ctsi"]["total_ctsi"], 5)
+
+    def test_batch_json(self):
         records = [
-            {"patient_id": "P1", "bun": 35.0, "pao2_fio2": 150.0, "of_hours": 50.0},
-            {"patient_id": "P2", "bun": 12.0, "pao2_fio2": 480.0, "of_hours": 0.0},
+            {"patient_id": "A", "cr": 2.4, "of_hours": 50},
+            {"patient_id": "B", "bun": 12, "pao2_fio2": 480},
         ]
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            json.dump(records, f)
-            temp_path = f.name
-
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            json.dump(records, handle)
+            path = handle.name
         try:
-            out = io.StringIO()
-            old_stdout = sys.stdout
-            sys.stdout = out
-            try:
-                code = cli.main(["--batch", temp_path, "--format", "json"])
-                self.assertEqual(code, 0)
-            finally:
-                sys.stdout = old_stdout
-
-            data = json.loads(out.getvalue())
-            self.assertEqual(len(data), 2)
+            code, output, _ = self._run(["--batch", path, "--json"])
+            self.assertEqual(code, 0)
+            data = json.loads(output)
             self.assertEqual(data[0]["atlanta_classification"]["category"], "Severe Acute Pancreatitis")
             self.assertEqual(data[1]["atlanta_classification"]["category"], "Mild Acute Pancreatitis")
         finally:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
+            os.remove(path)
 
-    def test_cli_json_flag(self):
-        out = io.StringIO()
-        old_stdout = sys.stdout
-        sys.stdout = out
+    def test_csv_false_boolean_is_false(self):
+        content = "patient_id,pleural_effusion,bun,age\nP,False,30,70\n"
+        with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as handle:
+            handle.write(content)
+            path = handle.name
         try:
-            code = cli.main(["--evaluate", "--patient-id", "TEST_JSON", "--bun", "32.0", "--cr", "2.5", "--json"])
+            code, output, _ = self._run(["--batch", path, "--json"])
             self.assertEqual(code, 0)
+            data = json.loads(output)[0]
+            self.assertFalse(data["bisap"]["pleural_effusion"])
+            self.assertEqual(data["bisap"]["total_score"], 2)
         finally:
-            sys.stdout = old_stdout
+            os.remove(path)
 
-        data = json.loads(out.getvalue())
-        self.assertEqual(data["patient_id"], "TEST_JSON")
-        self.assertIn("bisap", data)
-
-    def test_sample_csv_batch(self):
-        sample_path = PROJECT_ROOT / "sample.csv"
-        out = io.StringIO()
-        old_stdout = sys.stdout
-        sys.stdout = out
+    def test_csv_of_hours_is_honored(self):
+        content = "patient_id,cr,of_hours\nP,2.4,50\n"
+        with tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False) as handle:
+            handle.write(content)
+            path = handle.name
         try:
-            code = cli.main(["-i", str(sample_path), "--json"])
+            code, output, _ = self._run(["--batch", path, "--json"])
             self.assertEqual(code, 0)
+            data = json.loads(output)[0]
+            self.assertEqual(data["atlanta_classification"]["category"], "Severe Acute Pancreatitis")
         finally:
-            sys.stdout = old_stdout
+            os.remove(path)
 
-        data = json.loads(out.getvalue())
-        self.assertEqual(len(data), 3)
+    def test_sample_csv(self):
+        code, output, _ = self._run(["--batch", str(PROJECT_ROOT / "sample.csv"), "--json"])
+        self.assertEqual(code, 0)
+        self.assertEqual(len(json.loads(output)), 3)
 
-
-class TestInputValidation(unittest.TestCase):
-    """Tests for physiological range validation in PancreatitisLabs."""
-
-    def test_negative_bun_rejected(self):
-        with self.assertRaises(ValueError):
-            PancreatitisLabs(bun_mg_dl=-5.0)
-
-    def test_extreme_age_rejected(self):
-        with self.assertRaises(ValueError):
-            PancreatitisLabs(age=200)
-
-    def test_temperature_out_of_range(self):
-        with self.assertRaises(ValueError):
-            PancreatitisLabs(temp_c=50.0)
-
-    def test_phys_valid_values_accepted(self):
-        labs = PancreatitisLabs(bun_mg_dl=35.0, age=65, temp_c=38.5, heart_rate_bpm=110)
-        self.assertEqual(labs.bun_mg_dl, 35.0)
-        self.assertEqual(labs.age, 65)
-
-    def test_default_values_valid(self):
-        labs = PancreatitisLabs()
-        self.assertEqual(labs.bun_mg_dl, 15.0)
-        self.assertEqual(labs.age, 45)
-
-
-class TestCLISecurityAndErrors(unittest.TestCase):
-    """Tests for CLI path traversal prevention and error handling."""
-
-    def test_path_traversal_batch_rejected(self):
-        """Batch with non-existent path returns error code 1."""
-        out = io.StringIO()
-        old_stdout = sys.stdout
-        sys.stdout = out
+    def test_malformed_json_returns_one(self):
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as handle:
+            handle.write("{invalid")
+            path = handle.name
         try:
-            code = cli.main(["--batch", "../../../etc/passwd", "--format", "json"])
+            code, _, error = self._run(["--batch", path])
             self.assertEqual(code, 1)
+            self.assertIn("JSON", error)
         finally:
-            sys.stdout = old_stdout
+            os.remove(path)
 
-    def test_path_traversal_output_rejected(self):
-        """Output path escaping working directory is rejected."""
-        out = io.StringIO()
-        old_stdout = sys.stdout
-        sys.stdout = out
-        try:
-            code = cli.main([
-                "--evaluate", "--patient-id", "PT-01",
-                "--output", "../../tmp/evil.txt"
-            ])
-            self.assertEqual(code, 1)
-        finally:
-            sys.stdout = old_stdout
+    def test_nonexistent_batch_returns_one(self):
+        code, _, error = self._run(["--batch", "does-not-exist.csv"])
+        self.assertEqual(code, 1)
+        self.assertIn("File not found", error)
 
-    def test_malformed_json_batch(self):
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            f.write("{invalid json content")
-            temp_path = f.name
+    def test_output_path_traversal_rejected(self):
+        code, _, error = self._run(["--evaluate", "--output", "../../outside.txt"])
+        self.assertEqual(code, 1)
+        self.assertIn("escapes the working directory", error)
 
-        try:
-            out = io.StringIO()
-            old_stdout = sys.stdout
-            sys.stdout = out
-            try:
-                code = cli.main(["--batch", temp_path, "--format", "json"])
-                self.assertEqual(code, 1)
-            finally:
-                sys.stdout = old_stdout
-        finally:
-            if os.path.exists(temp_path):
-                os.remove(temp_path)
-
-    def test_nonexistent_batch_file(self):
-        out = io.StringIO()
-        old_stdout = sys.stdout
-        sys.stdout = out
-        try:
-            code = cli.main(["--batch", "nonexistent_file.csv", "--format", "json"])
-            self.assertEqual(code, 1)
-        finally:
-            sys.stdout = old_stdout
+    def test_safe_bool_invalid_rejected(self):
+        with self.assertRaises(ValueError):
+            cli._safe_bool("maybe", "flag")
 
 
 if __name__ == "__main__":

@@ -1,22 +1,7 @@
-"""
-Root Test Runner for Acute Pancreatitis Severity & Bundle Care Engine.
-"""
+"""Compatibility test runner."""
 
-import sys
 import unittest
-from pathlib import Path
-
-# Ensure project root is in path
-sys.path.insert(0, str(Path(__file__).parent))
-
-from tests.test_pancreas_guard import (
-    TestBISAPCalculator,
-    TestModifiedMarshallCalculator,
-    TestRevisedAtlantaClassification,
-    TestRansonAndCTSICalculators,
-    TestFluidAndBundleGuidelines,
-    TestCLIAndBatchExecution,
-)
 
 if __name__ == "__main__":
-    unittest.main()
+    suite = unittest.defaultTestLoader.discover("tests")
+    raise SystemExit(0 if unittest.TextTestRunner(verbosity=2).run(suite).wasSuccessful() else 1)

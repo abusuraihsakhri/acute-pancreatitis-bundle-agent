@@ -8,10 +8,14 @@ __pycache__/
 htmlcov/
 dist/
 build/
+_site/
 *.egg-info/
+*.whl
 .venv/
 venv/
 ENV/
+.mypy_cache/
+.ruff_cache/
 results.csv
 output.csv
 output.json
@@ -26,6 +30,6 @@ Thumbs.db
 *.swo
 *~
 
-# OS files
+# OS / backup files
 .directory
 *.bak
