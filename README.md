@@ -1,132 +1,119 @@
-# Acute Pancreatitis Severity Classification & Bundle Care Decision Support System
+# Acute Pancreatitis Bundle Agent
 
-A Python clinical decision support system and CLI tool for acute pancreatitis severity stratification, organ failure surveillance, and bundle care management. Implements the Revised Atlanta Classification (2012), Bedside Index for Severity in Acute Pancreatitis (BISAP), Modified Marshall Scoring System for multiorgan failure, Systemic Inflammatory Response Syndrome (SIRS) criteria, Ranson's Criteria, Balthazar CT Severity Index (CTSI), and goal-directed fluid/nutrition resuscitation protocols.
+A Python calculator and browser interface for structured acute pancreatitis severity assessment. It combines the Revised Atlanta Classification, BISAP, Modified Marshall organ dysfunction score, SIRS criteria, Ranson criteria, and the original Balthazar CT Severity Index (CTSI).
 
-Requires Python standard library only (zero external runtime dependencies).
-
----
+The project is intended for education, research, and clinical decision support. It assumes acute pancreatitis has already been diagnosed and does not replace clinical judgment, local protocols, or specialist assessment.
 
 ## Features
 
-- **Revised Atlanta Classification (2012):** Classifies presentation into Mild (no organ failure/complications), Moderately Severe (transient organ failure < 48 hours or local/systemic complications), or Severe (persistent organ failure >= 48 hours in one or more systems).
-- **Modified Marshall Organ Failure Score:** Evaluates respiratory ($PaO_2/FiO_2$), renal (serum creatinine), and cardiovascular (systolic blood pressure/inotropic support) dysfunction with standard physiological thresholds.
-- **BISAP Score & Mortality Stratification:** Points tallied for BUN > 25 mg/dL, Impaired mental status (GCS < 15), SIRS present, Age > 60 years, and Pleural effusion.
-- **Goal-Directed Fluid Resuscitation:** Evaluates hematocrit, BUN, and urine output targets; recommends Lactated Ringer's solution protocols and warns against volume overload in renal/heart failure.
-- **Nutritional & Antibiotic Stewardship:** Outlines evidence-based guidance for early enteral feeding vs. TPN, and stewardship protocols against routine prophylactic antibiotics in sterile acute pancreatitis.
-- **Interactive Wizard & Batch CLI:** Full command-line wizard, single-patient parameterized evaluation, and batch evaluation of patient cohorts via CSV.
+- Revised Atlanta severity classification based on organ failure and local/systemic complications.
+- BISAP and Modified Marshall scoring from clinical and laboratory inputs.
+- SIRS count, Ranson criteria utilities, and optional Balthazar CTSI calculation.
+- Goal-directed fluid prompts using a moderate starting strategy with reassessment rather than routine aggressive hydration.
+- Nutrition and antibiotic stewardship guidance.
+- Single-patient CLI, interactive mode, and CSV/JSON batch processing.
+- Static browser interface that runs the same Python calculation module locally with Pyodide.
+- No external Python runtime dependencies.
 
----
+## Browser interface
 
-## Installation & Requirements
+The static application lives in `site/` and is deployed by `.github/workflows/pages.yml` when GitHub Pages is enabled for the repository with **GitHub Actions** as the source.
 
-- Python 3.10+ (tested on 3.10, 3.11, 3.12)
-- Zero external runtime dependencies. `pytest` is optional for running unit tests.
+The browser downloads the Pyodide runtime and then executes `pancreatitis_severity.py` locally. Entered clinical values are not uploaded to this repository or stored by the page. The initial runtime download is comparatively large; subsequent calculations are local.
+
+## Python requirements
+
+Python 3.10 or newer is supported.
 
 ```bash
 git clone https://github.com/abusuraihsakhri/acute-pancreatitis-bundle-agent.git
 cd acute-pancreatitis-bundle-agent
+python -m pip install .
 ```
 
----
+## CLI
 
-## CLI Usage
+Single-patient JSON output:
 
-### 1. Single Patient Evaluation
-Evaluate acute pancreatitis presentation:
 ```bash
-python cli.py --evaluate --patient-id PT-001 --bun 32.0 --cr 2.2 --temp 38.8 --hr 112 --rr 26 --pao2-fio2 280 --sbp 95 --pleural-effusion --of-hours 48
+pancreatitis-bundle --evaluate \
+  --patient-id PT-001 \
+  --age 58 --weight 70 --gcs 14 \
+  --bun 32 --cr 2.2 --hct 47 \
+  --temp 38.8 --hr 112 --rr 26 \
+  --pao2-fio2 280 --sbp 95 \
+  --pleural-effusion --of-hours 48 --json
 ```
-Output as JSON:
+
+Batch processing:
+
 ```bash
-python cli.py --evaluate --patient-id PT-001 --bun 32.0 --cr 2.2 --temp 38.8 --hr 112 --rr 26 --pao2-fio2 280 --sbp 95 --pleural-effusion --of-hours 48 --json
+pancreatitis-bundle --batch sample.csv --json
 ```
 
-### 2. Batch Patient CSV Evaluation
-Process cohort CSV file:
+Optional CT inputs:
+
 ```bash
-python cli.py -i sample.csv --json
+pancreatitis-bundle --evaluate --balthazar D --necrosis 30 --json
 ```
 
-### 3. CT Severity Index Evaluation
-Incorporate contrast CT findings:
+Interactive mode:
+
 ```bash
-python cli.py --evaluate --patient-id PT-CT-01 --bun 26.0 --balthazar D --necrosis 30 --json
+pancreatitis-bundle --interactive
 ```
 
-### 4. Interactive Clinical Wizard
-Launch terminal clinical decision wizard:
-```bash
-python cli.py --interactive
-```
-
----
-
-## Python API Quickstart
+## Python API
 
 ```python
-from pancreatitis_severity import (
-    PancreatitisLabs,
-    AcutePancreatitisBundleEngine,
-)
-
-engine = AcutePancreatitisBundleEngine()
+from pancreatitis_severity import AcutePancreatitisBundleEngine, PancreatitisLabs
 
 labs = PancreatitisLabs(
-    bun_mg_dl=32.0,
+    bun_mg_dl=32,
     creatinine_mg_dl=2.2,
-    hematocrit_pct=47.0,
-    wbc_k_ul=18.5,
+    hematocrit_pct=47,
     temp_c=38.8,
     heart_rate_bpm=112,
     resp_rate_bpm=26,
-    pao2_fio2_ratio=280.0,
-    systolic_bp_mmhg=95.0,
-    has_pleural_effusion=True,
-    organ_failure_duration_hours=48.0,
+    pao2_fio2_ratio=280,
+    systolic_bp_mmhg=95,
+    age=58,
 )
 
-result = engine.evaluate_patient(
+result = AcutePancreatitisBundleEngine().evaluate_patient(
     patient_id="PT-001",
     labs=labs,
-    age=58,
     gcs_score=14,
+    pleural_effusion=True,
+    organ_failure_duration_hours=48,
+    weight_kg=70,
 )
 
-print(f"Atlanta Category: {result.atlanta_classification.category}")
-print(f"BISAP Score: {result.bisap.total_score} (Mortality: {result.bisap.mortality_risk_pct}%)")
-print(f"Organ Failure Present: {result.modified_marshall.has_organ_failure}")
-print(f"Recommended Fluid: {result.fluid_guidelines.recommended_fluid}")
-for item in result.action_items:
-    print(f" * {item}")
+print(result.atlanta_classification.category)
+print(result.bisap.total_score)
 ```
 
----
-
-## Input Validation & Safety
-
-All laboratory values and vital signs are validated against physiological ranges on instantiation. Out-of-range values raise `ValueError` with a descriptive message:
-
-```python
-from pancreatitis_severity import PancreatitisLabs
-
-# This will raise ValueError: bun_mg_dl=-5.0 is outside valid range [0.0, 300.0]
-labs = PancreatitisLabs(bun_mg_dl=-5.0)
-```
-
-The CLI also includes:
-- **Path traversal protection**: Output files (`--output`) must reside within the working directory.
-- **Graceful error handling**: Malformed CSV/JSON batch files produce clear error messages and exit code 1.
-- **Per-field validation**: Each lab value in batch files is validated before processing.
-
-## Running Tests
-
-Run the test suite using standard `unittest` or `pytest`:
+## Testing
 
 ```bash
-python test_pancreas_guard.py
-# or
-pytest -v
+python -m pip install ".[test]"
+python -m pytest -q
 ```
 
-The test suite includes 28 tests covering clinical calculations, CLI execution, input validation, and security controls.
+CI runs the test suite on Python 3.10 through 3.14, verifies the installed CLI, performs a batch smoke test, builds the package, and checks dependency consistency.
 
+## Clinical scope
+
+Revised Atlanta severity is determined by organ failure duration and local/systemic complications; BISAP and SIRS are reported as separate risk markers and do not by themselves change the Atlanta severity category. Fluid guidance is deliberately framed as a starting reference with repeated reassessment because aggressive fixed-volume resuscitation can cause harm.
+
+Key references:
+
+- Banks PA, et al. *Gut*. 2013;62:102-111. Revised Atlanta Classification. PMID: 23100216.
+- Tenner S, et al. *Am J Gastroenterol*. 2024;119:419-437. ACG guideline on acute pancreatitis. PMID: 38857482.
+- de-Madaria E, et al. *N Engl J Med*. 2022;387:989-1000. WATERFALL fluid-resuscitation trial. PMID: 36103415.
+
+Population-derived risk estimates and scoring systems should not be interpreted as individualized outcome predictions.
+
+## License
+
+MIT License. See `LICENSE`.
