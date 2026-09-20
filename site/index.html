@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Browser-based acute pancreatitis severity and supportive-care calculator.">
+  <title>Acute Pancreatitis Assessment</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/pyodide/v0.29.5/full/pyodide.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">AP</div>
+        <div>
+          <h1>Acute Pancreatitis Assessment</h1>
+          <p>Revised Atlanta, BISAP, Modified Marshall and optional CTSI</p>
+        </div>
+      </div>
+      <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch to dark theme" title="Toggle theme">
+        <span aria-hidden="true" id="theme-icon">◐</span>
+      </button>
+    </header>
+
+    <section class="notice" role="note">
+      <strong>Clinical decision support.</strong>
+      This calculator assumes acute pancreatitis has already been diagnosed. Results require clinical interpretation and do not replace local protocols or specialist assessment.
+    </section>
+
+    <div class="workspace">
+      <section class="panel input-panel" aria-labelledby="input-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Patient data</p>
+            <h2 id="input-heading">Assessment inputs</h2>
+          </div>
+          <button id="example-button" class="text-button" type="button">Load example</button>
+        </div>
+
+        <form id="assessment-form" novalidate>
+          <div class="form-grid compact-grid">
+            <label>Age <span>years</span><input id="age" name="age" type="number" min="0" max="150" step="1" value="52" required></label>
+            <label>Weight <span>kg</span><input id="weight" name="weight" type="number" min="20" max="350" step="0.1" value="70" required></label>
+            <label>GCS <span>3–15</span><input id="gcs" name="gcs" type="number" min="3" max="15" step="1" value="15" required></label>
+            <label>BUN <span>mg/dL</span><input id="bun" name="bun" type="number" min="0" max="300" step="0.1" value="28" required></label>
+            <label>Creatinine <span>mg/dL</span><input id="cr" name="cr" type="number" min="0" max="30" step="0.1" value="1.6" required></label>
+            <label>Hematocrit <span>%</span><input id="hct" name="hct" type="number" min="0" max="75" step="0.1" value="46" required></label>
+            <label>WBC <span>×10³/µL</span><input id="wbc" name="wbc" type="number" min="0" max="100" step="0.1" value="16.5" required></label>
+            <label>Temperature <span>°C</span><input id="temp" name="temp" type="number" min="25" max="45" step="0.1" value="38.4" required></label>
+            <label>Heart rate <span>bpm</span><input id="hr" name="hr" type="number" min="0" max="300" step="1" value="104" required></label>
+            <label>Resp. rate <span>/min</span><input id="rr" name="rr" type="number" min="0" max="80" step="1" value="24" required></label>
+            <label>PaO₂/FiO₂ <span>ratio</span><input id="pao2_fio2" name="pao2_fio2" type="number" min="0" max="800" step="1" value="320" required></label>
+            <label>Systolic BP <span>mmHg</span><input id="sbp" name="sbp" type="number" min="0" max="300" step="1" value="115" required></label>
+          </div>
+
+          <div class="flag-grid" aria-label="Clinical flags">
+            <label class="check-row"><input id="pleural_effusion" type="checkbox"><span>Pleural effusion</span></label>
+            <label class="check-row"><input id="systemic_complication" type="checkbox"><span>Systemic complication*</span></label>
+            <label class="check-row"><input id="fluid_responsive" type="checkbox"><span>Fluid-responsive hypotension</span></label>
+          </div>
+
+          <details class="advanced" id="advanced-details">
+            <summary>Advanced / imaging inputs</summary>
+            <div class="form-grid advanced-grid">
+              <label>Organ failure <span>hours</span><input id="of_hours" type="number" min="0" max="10000" step="1" value="0"></label>
+              <label>Arterial pH <span>unitless</span><input id="ph" type="number" min="6.5" max="8" step="0.01" value="7.36"></label>
+              <label>Balthazar grade <span>optional</span>
+                <select id="balthazar">
+                  <option value="">Not entered</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option>
+                </select>
+              </label>
+              <label>Necrosis <span>%</span><input id="necrosis" type="number" min="0" max="100" step="1" value="0"></label>
+              <label class="wide-field">Local complication <span>optional text</span><input id="local_complication" type="text" maxlength="180" placeholder="e.g. acute peripancreatic fluid collection"></label>
+            </div>
+            <p class="field-note">*Revised Atlanta systemic complication: exacerbation of a pre-existing co-morbidity attributable to acute pancreatitis.</p>
+          </details>
+
+          <div class="form-actions">
+            <button class="primary-button" id="analyse-button" type="submit" disabled>
+              <span id="analyse-label">Loading calculator…</span>
+            </button>
+            <button class="secondary-button" id="reset-button" type="button">Reset</button>
+            <span class="runtime-status" id="runtime-status" role="status" aria-live="polite">Starting Python runtime</span>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel results-panel" aria-labelledby="results-heading">
+        <div class="panel-heading results-heading-row">
+          <div>
+            <p class="eyebrow">Calculated output</p>
+            <h2 id="results-heading">Results</h2>
+          </div>
+          <span class="status-pill" id="result-status">Awaiting input</span>
+        </div>
+
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon" aria-hidden="true">↗</div>
+          <h3>Ready when you are</h3>
+          <p>Enter the available clinical data and select <strong>Analyse</strong>. Calculation runs locally in your browser.</p>
+        </div>
+
+        <div id="results-content" class="results-content" hidden aria-live="polite">
+          <div class="severity-card">
+            <span class="card-label">Revised Atlanta</span>
+            <strong id="atlanta-category">—</strong>
+            <span id="organ-failure-status">—</span>
+          </div>
+
+          <div class="metric-grid">
+            <article class="metric-card"><span>BISAP</span><strong id="bisap-score">—</strong><small id="bisap-tier">—</small></article>
+            <article class="metric-card"><span>Marshall max</span><strong id="marshall-score">—</strong><small id="marshall-detail">—</small></article>
+            <article class="metric-card"><span>SIRS</span><strong id="sirs-score">—</strong><small id="sirs-detail">—</small></article>
+            <article class="metric-card"><span>Fluid reference</span><strong id="fluid-rate">—</strong><small id="fluid-bolus">—</small></article>
+          </div>
+
+          <div id="ctsi-card" class="ctsi-strip" hidden>
+            <span>CTSI</span><strong id="ctsi-score">—</strong><small id="ctsi-detail">—</small>
+          </div>
+
+          <div class="care-setting">
+            <span class="card-label">Care setting prompt</span>
+            <p id="care-level">—</p>
+          </div>
+
+          <details class="result-details" open>
+            <summary>Clinical flags and guidance</summary>
+            <div class="detail-section">
+              <h3>Action flags</h3>
+              <ul id="action-list"></ul>
+            </div>
+            <div class="detail-section two-col-details">
+              <div><h3>Nutrition</h3><p id="nutrition-guideline">—</p></div>
+              <div><h3>Antibiotics</h3><p id="antibiotic-guideline">—</p></div>
+            </div>
+          </details>
+        </div>
+
+        <div id="error-box" class="error-box" role="alert" hidden></div>
+      </section>
+    </div>
+
+    <footer>
+      <span>No data are uploaded or stored by this page.</span>
+      <a href="https://github.com/abusuraihsakhri/acute-pancreatitis-bundle-agent" rel="noopener noreferrer">Source code</a>
+    </footer>
+  </main>
+</body>
+</html>
