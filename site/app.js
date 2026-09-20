@@ -38,5 +38,204 @@ function initTheme() {
 }
 
 function setFields(values) {
-  Object.entries(uÙ…±Õ•Ì¤¹™½É…  ¡m­•ä°Ù…±Õ•t¤€ôøì(€€€½¹ÍÐ•±•µ•¹Ð€ô€¡­•ä¤ì(€€€¥˜€¡•±•µ•¹Ð¤•±•µ•¹Ð¹Ù…±Õ”€ôMÑÉ¥¹œ¡Ù…±Õ”¤ì(€ô¤ì)ô()™Õ¹Ñ¥½¸É•Í•Ñ½É´ ¤ì(€™½É´¹É•Í•Ð ¤ì(€Í•Ñ¥•±‘Ì¡‘•™…Õ±ÑÌ¤ì(€€ ‰Á±•ÕÉ…±}•™™ÕÍ¥½¸ˆ¤¹¡•­•€ô™…±Í”ì(€€ ‰ÍåÍÑ•µ¥}½µÁ±¥…Ñ¥½¸ˆ¤¹¡•­•€ô™…±Í”ì(€€ ‰™±Õ¥‘}É•ÍÁ½¹Í¥Ù”ˆ¤¹¡•­•€ô™…±Í”ì(€€ ‰…‘Ù…¹•µ‘•Ñ…¥±Ìˆ¤¹½Á•¸€ô™…±Í”ì(€É•ÍÕ±ÑÍ½¹Ñ•¹Ð¹¡¥‘‘•¸€ôÑÉÕ”ì(€•µÁÑåMÑ…Ñ”¹¡¥‘‘•¸€ô™…±Í”ì(€•ÉÉ½É	½à¹¡¥‘‘•¸€ôÑÉÕ”ì(€É•ÍÕ±ÑMÑ…ÑÕÌ¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰Ý…¥Ñ¥¹œ¥¹ÁÕÐˆì)ô()™Õ¹Ñ¥½¸±½…‘á…µÁ±” ¤ì(€Í•Ñ¥•±‘Ì¡•á…µÁ±”¤ì(€€ ‰Á±•ÕÉ…±}•™™ÕÍ¥½¸ˆ¤¹¡•­•€ôÑÉÕ”ì(€€ ‰ÍåÍÑ•µ¥}½µÁ±¥…Ñ¥½¸ˆ¤¹¡•­•€ô™…±Í”ì(€€ ‰™±Õ¥‘}É•ÍÁ½¹Í¥Ù”ˆ¤¹¡•­•€ô™…±Í”ì(€€ ‰…‘Ù…¹•µ‘•Ñ…¥±Ìˆ¤¹½Á•¸€ôÑÉÕ”ì)ô()™Õ¹Ñ¥½¸¹Õµ‰•ÉY…±Õ”¡¥¤ì(€½¹ÍÐ•±•µ•¹Ð€ô€¡¥¤ì(€½¹ÍÐÙ…±Õ”€ô9Õµ‰•È¡•±•µ•¹Ð¹Ù…±Õ”¤ì(€¥˜€ …9Õµ‰•È¹¥Í¥¹¥Ñ”¡Ù…±Õ”¤¤Ñ¡É½Ü¹•ÜÉÉ½È¡€‘í•±•µ•¹Ð¹±½Í•ÍÐ ‰±…‰•°ˆ¤ü¹™¥ÉÍÑ¡¥±ü¹Ñ•áÑ½¹Ñ•¹Ðü¹ÑÉ¥´ ¤ñð¥‘ôµÕÍÐ‰”„¹Õµ‰•È¹€¤ì(€É•ÑÕÉ¸Ù…±Õ”ì)ô()™Õ¹Ñ¥½¸Á…å±½…‘É½µ½É´ ¤ì(€¥˜€ …™½É´¹É•Á½ÉÑY…±¥‘¥Ñä ¤¤Ñ¡É½Ü¹•ÜÉÉ½È ‰¡•¬Ñ¡”¡¥¡±¥¡Ñ•¥¹ÁÕÐÙ…±Õ•Ì¸ˆ¤ì(€É•ÑÕÉ¸ì(€€€Á…Ñ¥•¹Ñ}¥è€‰]ˆ°(€€€…”è¹Õµ‰•ÉY…±Õ” ‰…”ˆ¤°(€€€Ý•¥¡Ðè¹Õµ‰•ÉY…±Õ” ‰Ý•¥¡Ðˆ¤°(€€€Ìè¹Õµ‰•ÉY…±Õ” ‰Ìˆ¤°(€€€‰Õ¸è¹Õµ‰•ÉY…±Õ” ‰‰Õ¸ˆ¤°(€€€Èè¹Õµ‰•ÉY…±Õ” ‰Èˆ¤°(€€€¡Ðè¹Õµ‰•ÉY…±Õ” ‰¡Ðˆ¤°(€€€Ý‰Œè¹Õµ‰•ÉY…±Õ” ‰Ý‰Œˆ¤°(€€€Ñ•µÀè¹Õµ‰•ÉY…±Õ” ‰Ñ•µÀˆ¤°(€€€¡Èè¹Õµ‰•ÉY…±Õ” ‰¡Èˆ¤°(€€€ÉÈè¹Õµ‰•ÉY…±Õ” ‰ÉÈˆ¤°(€€€Á…¼É}™¥¼Èè¹Õµ‰•ÉY…±Õ” ‰Á…¼É}™¥¼Èˆ¤°(€€€Í‰Àè¹Õµ‰•ÉY…±Õ” ‰Í‰Àˆ¤°(€€€Á è¹Õµ‰•ÉY…±Õ” ‰Á ˆ¤°(€€€Á±•ÕÉ…±}•™™ÕÍ¥½¸è€ ‰Á±•ÕÉ…±}•™™ÕÍ¥½¸ˆ¤¹¡•­•°(€€€ÍåÍÑ•µ¥}½µÁ±¥…Ñ¥½¸è€ ‰ÍåÍÑ•µ¥}½µÁ±¥…Ñ¥½¸ˆ¤¹¡•­•°(€€€™±Õ¥‘}É•ÍÁ½¹Í¥Ù•}¡åÁ½Ñ•¹Í¥½¸è€ ‰™±Õ¥‘}É•ÍÁ½¹Í¥Ù”ˆ¤¹¡•­•°(€€€½™}¡½ÕÉÌè¹Õµ‰•ÉY…±Õ” ‰½™}¡½ÕÉÌˆ¤°(€€€‰…±Ñ¡…é…Èè€ ‰‰…±Ñ¡…é…Èˆ¤¹Ù…±Õ”ñð¹Õ±°°(€€€¹•É½Í¥Ìè¹Õµ‰•ÉY…±Õ” ‰¹•É½Í¥Ìˆ¤°(€€€±½…±}½µÁ±¥…Ñ¥½¹Ìè€ ‰±½…±}½µÁ±¥…Ñ¥½¸ˆ¤¹Ù…±Õ”¹ÑÉ¥´ ¤€ül ‰±½…±}½µÁ±¥…Ñ¥½¸ˆ¤¹Ù…±Õ”¹ÑÉ¥´ ¥t€èmt(€ôì)ô()™Õ¹Ñ¥½¸Í•ÑQ•áÐ¡¥°Ù…±Õ”¤ì(€€¡¥¤¹Ñ•áÑ½¹Ñ•¹Ð€ôÙ…±Õ”ì)ô()™Õ¹Ñ¥½¸É•¹‘•ÉÑ¥½¹Ì¡¥Ñ•µÌ¤ì(€½¹ÍÐ±¥ÍÐ€ô€ ‰…Ñ¥½¸µ±¥ÍÐˆ¤ì(€±¥ÍÐ¹É•Á±…•¡¥±‘É•¸ ¤ì(€½¹ÍÐÍ…™•%Ñ•µÌ€ô¥Ñ•µÌ¹±•¹Ñ €ü¥Ñ•µÌ€èl‰9¼…‘‘¥Ñ¥½¹…°™±…Ì™É½´Ñ¡”•¹Ñ•É•‘…Ñ„¸‰tì(€Í…™•%Ñ•µÌ¹™½É…  ¡¥Ñ•´¤€ôøì(€€€½¹ÍÐ±¤€ô‘½Õµ•¹Ð¹É•…Ñ•±•µ•¹Ð ‰±¤ˆ¤ì(€€€±¤¹Ñ•áÑ½¹Ñ•¹Ð€ô¥Ñ•´ì(€€€±¥ÍÐ¹…ÁÁ•¹‘¡¥±¡±¤¤ì(€ô¤ì)ô()™Õ¹Ñ¥½¸É•¹‘•ÉI•ÍÕ±Ð¡‘…Ñ„¤ì(€½¹ÍÐ…Ñ±…¹Ñ„€ô‘…Ñ„¹…Ñ±…¹Ñ…}±…ÍÍ¥™¥…Ñ¥½¸ì(€½¹ÍÐµ…ÉÍ¡…±°€ô‘…Ñ„¹µ½‘¥™¥•‘}µ…ÉÍ¡…±°ì(€Í•ÑQ•áÐ ‰…Ñ±…¹Ñ„µ…Ñ•½Éäˆ°…Ñ±…¹Ñ„¹…Ñ•½Éä¤ì(€Í•ÑQ•áÐ ‰½É…¸µ™…¥±ÕÉ”µÍÑ…ÑÕÌˆ°=É…¸™…¥±ÕÉ”è€‘í…Ñ±…¹Ñ„¹½É…¹}™…¥±ÕÉ•}ÍÑ…ÑÕÍõ€¤ì(€Í•ÑQ•áÐ ‰‰¥Í…ÀµÍ½É”ˆ°€‘í‘…Ñ„¹‰¥Í…À¹Ñ½Ñ…±}Í½É•ô¼Õ€¤ì(€Í•ÑQ•áÐ ‰‰¥Í…ÀµÑ¥•Èˆ°‘…Ñ„¹‰¥Í…À¹Í•Ù•É¥Ñå}Ñ¥•È¤ì(€Í•ÑQ•áÐ ‰µ…ÉÍ¡…±°µÍ½É”ˆ°€‘íµ…ÉÍ¡…±°¹µ…á}½É…¹}Í½É•ô¼Ñ€¤ì(€Í•ÑQ•áÐ ‰µ…ÉÍ¡…±°µ‘•Ñ…¥°ˆ°µ…ÉÍ¡…±°¹¡…Í}½É…¹}™…¥±ÕÉ”€ü€‰=É…¸™…¥±ÕÉ”ÁÉ•Í•¹Ðˆ€è€‰9¼½É…¸™…¥±ÕÉ”‰äÍ½É”ˆ¤ì(€Í•ÑQ•áÐ ‰Í¥ÉÌµÍ½É”ˆ°€‘í‘…Ñ„¹Í¥ÉÍ}É¥Ñ•É¥…}½Õ¹Ñô¼Ñ€¤ì(€Í•ÑQ•áÐ ‰Í¥ÉÌµ‘•Ñ…¥°ˆ°‘…Ñ„¹Í¥ÉÍ}ÁÉ•Í•¹Ð€ü€‰M%ILÁÉ•Í•¹Ðˆ€è€‰M%IL¹½ÐÁÉ•Í•¹Ðˆ¤ì(€Í•ÑQ•áÐ ‰™±Õ¥µÉ…Ñ”ˆ°€‘í9Õµ‰•È¡‘…Ñ„¹™±Õ¥‘}Õ¥‘•±¥¹•Ì¹¥¹¥Ñ¥…±}É…Ñ•}µ±}¡È¤¹Ñ½¥á• Ä¥ôµ0½¡€¤ì(€Í•ÑQ•áÐ ‰™±Õ¥µ‰½±ÕÌˆ°‘…Ñ„¹™±Õ¥‘}Õ¥‘•±¥¹•Ì¹‰½±ÕÍ}¥¹‘¥…Ñ•€ü€‰	½±ÕÌ™±…œÁÉ•Í•¹Ðˆ€è€‰9¼‰½±ÕÌ™±…œˆ¤ì(€Í•ÑQ•áÐ ‰…É”µ±•Ù•°ˆ°…Ñ±…¹Ñ„¹É•½µµ•¹‘•‘}±•Ù•±}½™}…É”¤ì(€Í•ÑQ•áÐ ‰¹ÕÑÉ¥Ñ¥½¸µÕ¥‘•±¥¹”ˆ°‘…Ñ„¹¹ÕÑÉ¥Ñ¥½¹}Õ¥‘•±¥¹”¤ì(€Í•ÑQ•áÐ ‰…¹Ñ¥‰¥½Ñ¥ŒµÕ¥‘•±¥¹”ˆ°‘…Ñ„¹…¹Ñ¥‰¥½Ñ¥}Õ¥‘•±¥¹”¤ì(€É•¹‘•ÉÑ¥½¹Ì¡‘…Ñ„¹…Ñ¥½¹}¥Ñ•µÌñðmt¤ì((€½¹ÍÐÑÍ¥…É€ô€ ‰ÑÍ¤µ…Éˆ¤ì(€¥˜€¡‘…Ñ„¹ÑÍ¤¤ì(€€€ÑÍ¥…É¹¡¥‘‘•¸€ô™…±Í”ì(€€€Í•ÑQ•áÐ ‰ÑÍ¤µÍ½É”ˆ°€‘í‘…Ñ„¹ÑÍ¤¹Ñ½Ñ…±}ÑÍ¥ô¼ÄÁ€¤ì(€€€Í•ÑQ•áÐ ‰ÑÍ¤µ‘•Ñ…¥°ˆ°	…±Ñ¡…é…È€‘í‘…Ñ„¹ÑÍ¤¹‰…±Ñ¡…é…É}É…‘•ôì¹•É½Í¥Ì€‘í‘…Ñ„¹ÑÍ¤¹¹•É½Í¥Í}ÁÑô•€¤ì(€ô•±Í”ì(€€€ÑÍ¥…É¹¡¥‘‘•¸€ôÑÉÕ”ì(€ô((€•µÁÑåMÑ…Ñ”¹¡¥‘‘•¸€ôÑÉÕ”ì(€•ÉÉ½É	½à¹¡¥‘‘•¸€ôÑÉÕ”ì(€É•ÍÕ±ÑÍ½¹Ñ•¹Ð¹¡¥‘‘•¸€ô™…±Í”ì(€É•ÍÕ±ÑMÑ…ÑÕÌ¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰…±Õ±…Ñ•ˆì)ô()™Õ¹Ñ¥½¸Í¡½ÝÉÉ½È¡•ÉÉ½È¤ì(€½¹ÍÐµ•ÍÍ…”€ô•ÉÉ½È¥¹ÍÑ…¹•½˜ÉÉ½È€ü•ÉÉ½È¹µ•ÍÍ…”€èMÑÉ¥¹œ¡•ÉÉ½È¤ì(€•ÉÉ½É	½à¹Ñ•áÑ½¹Ñ•¹Ð€ôµ•ÍÍ…”¹É•Á±…” ½yÉÉ½ÈéqÌ¨¼°€ˆˆ¤ì(€•ÉÉ½É	½à¹¡¥‘‘•¸€ô™…±Í”ì(€É•ÍÕ±ÑMÑ…ÑÕÌ¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰%¹ÁÕÐ•ÉÉ½Èˆì)ô()…Íå¹Œ™Õ¹Ñ¥½¸¥¹¥Ñ¥…±¥Í•IÕ¹Ñ¥µ” ¤ì(€ÑÉäì(€€€ÉÕ¹Ñ¥µ•MÑ…ÑÕÌ¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰1½…‘¥¹œAåÑ¡½¸ÉÕ¹Ñ¥µ—Š˜ˆì(€€€Áå½‘¥‘”€ô…Ý…¥Ð±½…‘Aå½‘¥‘”¡ì¥¹‘•áUI0è€‰¡ÑÑÁÌè¼½‘¸¹©Í‘•±¥ÙÈ¹¹•Ð½Áå½‘¥‘”½ØÀ¸Èä¸Ô½™Õ±°¼ˆô¤ì(€€€½¹ÍÐÉ•ÍÁ½¹Í”€ô…Ý…¥Ð™•Ñ  ‰Á…¹É•…Ñ¥Ñ¥Í}Í•Ù•É¥Ñä¹Áäˆ°ì…¡”è€‰¹¼µÍÑ½É”ˆô¤ì(€€€¥˜€ …É•ÍÁ½¹Í”¹½¬¤Ñ¡É½Ü¹•ÜÉÉ½È¡U¹…‰±”Ñ¼±½……±Õ±…Ñ½Èµ½‘Õ±”€ ‘íÉ•ÍÁ½¹Í”¹ÍÑ…ÑÕÍô¤¹€¤ì(€€€½¹ÍÐÍ½ÕÉ”€ô…Ý…¥ÐÉ•ÍÁ½¹Í”¹Ñ•áÐ ¤ì(€€€Áå½‘¥‘”¹L¹ÝÉ¥Ñ•¥±” ˆ½¡½µ”½Áå½‘¥‘”½Á…¹É•…Ñ¥Ñ¥Í}Í•Ù•É¥Ñä¹Áäˆ°Í½ÕÉ”¤ì(€€€…Ý…¥ÐÁå½‘¥‘”¹ÉÕ¹AåÑ¡½¹Íå¹Œ ‰¥µÁ½ÉÐÁ…¹É•…Ñ¥Í}Í•Ù•É¥Ñäˆ¤ì(€€€ÉÕ¹Ñ¥µ•I•…‘ä€ôÑÉÕ”ì(€€€…¹…±åÍ•	ÕÑÑ½¸¹‘¥Í…‰±•€ô™…±Í”ì(€€€…¹…±åÍ•1…‰•°¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰¹…±åÍ”ˆì(€€€ÉÕ¹Ñ¥µ•MÑ…ÑÕÌ¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰…±Õ±…Ñ½ÈÉ•…‘äƒ
-ÐÉÕ¹Ì±½…±±äˆì(€ô…Ñ €¡•ÉÉ½È¤ì(€€€ÉÕ¹Ñ¥µ•MÑ…ÑÕÌ¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰…±Õ±…Ñ½È™…¥±•Ñ¼±½…ˆì(€€€…¹…±åÍ•1…‰•°¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰U¹…Ù…¥±…‰±”ˆì(€€€Í¡½ÝÉÉ½È¡•ÉÉ½È¤ì(€ô)ô()…Íå¹Œ™Õ¹Ñ¥½¸…¹…±åÍ”¡•Ù•¹Ð¤ì(€•Ù•¹Ð¹ÁÉ•Ù•¹Ñ•™…Õ±Ð ¤ì(€¥˜€ …ÉÕ¹Ñ¥µ•I•…‘äñð€…Áå½‘¥‘”¤É•ÑÕÉ¸ì((€•ÉÉ½É	½à¹¡¥‘‘•¸€ôÑÉÕ”ì(€…¹…±åÍ•	ÕÑÑ½¸¹‘¥Í…‰±•€ôÑÉÕ”ì(€…¹…±åÍ•1…‰•°¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰¹…±åÍ¥¹ŸŠ˜ˆì(€É•ÍÕ±ÑMÑ…ÑÕÌ¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰…±Õ±…Ñ¥¹œˆì((€ÑÉäì(€€€½¹ÍÐÁ…å±½…€ôÁ…å±½…‘É½µ½É´ ¤ì(€€€Áå½‘¥‘”¹±½‰…±Ì¹Í•Ð ‰Á…å±½…‘}©Í½¸ˆ°)M=8¹ÍÑÉ¥¹¥™ä¡Á…å±½…¤¤ì(€€€½¹ÍÐÉ•ÍÕ±Ñ)Í½¸€ô…Ý…¥ÐÁå½‘¥‘”¹ÉÕ¹AåÑ¡½¹Íå¹Œ¡€)¥µÁ½ÉÐ©Í½¸)™É½´‘…Ñ…±…ÍÍ•Ì¥µÁ½ÉÐ…Í‘¥Ð)™É½´Á…¹É•…Ñ¥Ñ¥Í}Í•Ù•É¥Ñä¥µÁ½ÉÐA…¹É•…Ñ¥Ñ¥Í1…‰Ì°ÕÑ•A…¹É•…Ñ¥Ñ¥Í	Õ¹‘±•¹¥¹”()À€ô©Í½¸¹±½…‘Ì¡Á…å±½…‘}©Í½¸¤)±…‰Ì€ôA…¹É•…Ñ¥Ñ¥Í1…‰Ì (€€€‰Õ¹}µ}‘°õÁl‰‰Õ¸‰t°(€€€É•…Ñ¥¹¥¹•}µ}‘°õÁl‰È‰t°(€€€¡•µ…Ñ½É¥Ñ}ÁÐõÁl‰¡Ð‰t°(€€€Ý‰}­}Õ°õÁl‰Ý‰Œ‰t°(€€€Ñ•µÁ}ŒõÁl‰Ñ•µÀ‰t°(€€€¡•…ÉÑ}É…Ñ•}‰Á´õ¥¹Ð¡Ál‰¡È‰t¤°(€€€É•ÍÁ}É…Ñ•}‰Á´õ¥¹Ð¡Ál‰ÉÈ‰t¤°(€€€Á…¼É}™¥¼É}É…Ñ¥¼õÁl‰Á…¼É}™¥¼È‰t°(€€€ÍåÍÑ½±¥}‰Á}µµ¡œõÁl‰Í‰À‰t°(€€€…ÉÑ•É¥…±}Á õÁl‰Á ‰t°(€€€…”õ¥¹Ð¡Ál‰…”‰t¤°(€€€™±Õ¥‘}É•ÍÁ½¹Í¥Ù•}¡åÁ½Ñ•¹Í¥½¸õÁl‰™±Õ¥‘}É•ÍÁ½¹Í¥Ù•}¡åÁ½Ñ•¹Í¥½¸‰t°(¤)É•ÍÕ±Ð€ôÕÑ•A…¹É•…Ñ¥Ñ¥Í	Õ¹‘±•¹¥¹” ¤¹•Ù…±Õ…Ñ•}Á…Ñ¥•¹Ð (€€€Á…Ñ¥•¹Ñ}¥õÁl‰Á…Ñ¥•¹Ñ}¥‰t°(€€€±…‰Ìõ±…‰Ì°(€€€Í}Í½É”õ¥¹Ð¡Ál‰Ì‰t¤°(€€€Á±•ÕÉ…±}•™™ÕÍ¥½¸õÁl‰Á±•ÕÉ…±}•™™ÕÍ¥½¸‰t°(€€€½É…¹}™…¥±ÕÉ•}‘ÕÉ…Ñ¥½¹}¡½ÕÉÌõÁl‰½™}¡½ÕÉÌ‰t°(€€€±½…±}½µÁ±¥…Ñ¥½¹ÌõÁl‰±½…±}½µÁ±¥…Ñ¥½¹Ì‰t°(€€€ÍåÍÑ•µ¥}½µÁ±¥…Ñ¥½¹ÌõÁl‰ÍåÍÑ•µ¥}½µÁ±¥…Ñ¥½¸‰t°(€€€Ñ}‰…±Ñ¡…é…É}É…‘”õÁl‰‰…±Ñ¡…é…È‰t°(€€€Ñ}¹•É½Í¥Í}ÁÐõÁl‰¹•É½Í¥Ì‰t°(€€€Ý•¥¡Ñ}­œõÁl‰Ý•¥¡Ð‰t°(¤)©Í½¸¹‘ÕµÁÌ¡…Í‘¥Ð¡É•ÍÕ±Ð¤¤)€¤ì(€€€É•¹‘•ÉI•ÍÕ±Ð¡)M=8¹Á…ÉÍ”¡É•ÍÕ±Ñ)Í½¸¤¤ì(€ô…Ñ €¡•ÉÉ½È¤ì(€€€Í¡½ÝÉÉ½È¡•ÉÉ½È¤ì(€ô™¥¹…±±äì(€€€…¹…±åÍ•	ÕÑÑ½¸¹‘¥Í…‰±•€ô™…±Í”ì(€€€…¹…±åÍ•1…‰•°¹Ñ•áÑ½¹Ñ•¹Ð€ô€‰¹…±åÍ”ˆì(€ô)ô(( ‰Ñ¡•µ”µÑ½±”ˆ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰±¥¬ˆ°€ ¤€ôøì(€Í•ÑQ¡•µ”¡‘½Õµ•¹Ð¹‘½Õµ•¹Ñ±•µ•¹Ð¹‘…Ñ…Í•Ð¹Ñ¡•µ”€ôôô€‰‘…É¬ˆ€ü€‰±¥¡Ðˆ€è€‰‘…É¬ˆ¤ì)ô¤ì( ‰•á…µÁ±”µ‰ÕÑÑ½¸ˆ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰±¥¬ˆ°±½…‘á…µÁ±”¤ì( ‰É•Í•Ðµ‰ÕÑÑ½¸ˆ¤¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰±¥¬ˆ°É•Í•Ñ½É´¤ì)™½É´¹…‘‘Ù•¹Ñ1¥ÍÑ•¹•È ‰ÍÕ‰µ¥Ðˆ°…¹…±åÍ”¤ì()¥¹¥ÑQ¡•µ” ¤ì)É•Í•Ñ½É´ ¤ì)¥¹¥Ñ¥…±¥Í•IÕ¹Ñ¥µ” ¤ì(
+  Object.entries(values).forEach(([key, value]) => {
+    const element = $(key);
+    if (element) element.value = String(value);
+  });
+}
+
+function resetForm() {
+  form.reset();
+  setFields(defaults);
+  $("pleural_effusion").checked = false;
+  $("systemic_complication").checked = false;
+  $("fluid_responsive").checked = false;
+  $("advanced-details").open = false;
+  resultsContent.hidden = true;
+  emptyState.hidden = false;
+  errorBox.hidden = true;
+  resultStatus.textContent = "Awaiting input";
+}
+
+function loadExample() {
+  setFields(example);
+  $("pleural_effusion").checked = true;
+  $("systemic_complication").checked = false;
+  $("fluid_responsive").checked = false;
+  $("advanced-details").open = true;
+}
+
+function numberValue(id) {
+  const element = $(id);
+  const value = Number(element.value);
+  if (!Number.isFinite(value)) throw new Error(`${element.closest("label")?.firstChild?.textContent?.trim() || id} must be a number.`);
+  return value;
+}
+
+function payloadFromForm() {
+  if (!form.reportValidity()) throw new Error("Check the highlighted input values.");
+  return {
+    patient_id: "WEB",
+    age: numberValue("age"),
+    weight: numberValue("weight"),
+    gcs: numberValue("gcs"),
+    bun: numberValue("bun"),
+    cr: numberValue("cr"),
+    hct: numberValue("hct"),
+    wbc: numberValue("wbc"),
+    temp: numberValue("temp"),
+    hr: numberValue("hr"),
+    rr: numberValue("rr"),
+    pao2_fio2: numberValue("pao2_fio2"),
+    sbp: numberValue("sbp"),
+    ph: numberValue("ph"),
+    pleural_effusion: $("pleural_effusion").checked,
+    systemic_complication: $("systemic_complication").checked,
+    fluid_responsive_hypotension: $("fluid_responsive").checked,
+    of_hours: numberValue("of_hours"),
+    balthazar: $("balthazar").value || null,
+    necrosis: numberValue("necrosis"),
+    local_complications: $("local_complication").value.trim() ? [$("local_complication").value.trim()] : []
+  };
+}
+
+function setText(id, value) {
+  $(id).textContent = value;
+}
+
+function renderActions(items) {
+  const list = $("action-list");
+  list.replaceChildren();
+  const safeItems = items.length ? items : ["No additional flags from the entered data."];
+  safeItems.forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
+}
+
+function renderResult(data) {
+  const atlanta = data.atlanta_classification;
+  const marshall = data.modified_marshall;
+  setText("atlanta-category", atlanta.category);
+  setText("organ-failure-status", `Organ failure: ${atlanta.organ_failure_status}`);
+  setText("bisap-score", `${data.bisap.total_score}/5`);
+  setText("bisap-tier", data.bisap.severity_tier);
+  setText("marshall-score", `${marshall.max_organ_score}/4`);
+  setText("marshall-detail", marshall.has_organ_failure ? "Organ failure present" : "No organ failure by score");
+  setText("sirs-score", `${data.sirs_criteria_count}/4`);
+  setText("sirs-detail", data.sirs_present ? "SIRS present" : "SIRS not present");
+  setText("fluid-rate", `${Number(data.fluid_guidelines.initial_rate_ml_hr).toFixed(1)} mL/h`);
+  setText("fluid-bolus", data.fluid_guidelines.bolus_indicated ? "Bolus flag present" : "No bolus flag");
+  setText("care-level", atlanta.recommended_level_of_care);
+  setText("nutrition-guideline", data.nutrition_guideline);
+  setText("antibiotic-guideline", data.antibiotic_guideline);
+  renderActions(data.action_items || []);
+
+  const ctsiCard = $("ctsi-card");
+  if (data.ctsi) {
+    ctsiCard.hidden = false;
+    setText("ctsi-score", `${data.ctsi.total_ctsi}/10`);
+    setText("ctsi-detail", `Balthazar ${data.ctsi.balthazar_grade}; necrosis ${data.ctsi.necrosis_pct}%`);
+  } else {
+    ctsiCard.hidden = true;
+  }
+
+  emptyState.hidden = true;
+  errorBox.hidden = true;
+  resultsContent.hidden = false;
+  resultStatus.textContent = "Calculated";
+}
+
+function showError(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  errorBox.textContent = message.replace(/^Error:\s*/, "");
+  errorBox.hidden = false;
+  resultStatus.textContent = "Input error";
+}
+
+async function initialiseRuntime() {
+  try {
+    runtimeStatus.textContent = "Loading Python runtimeâ€¦";
+    pyodide = await loadPyodide({ indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.5/full/" });
+    const response = await fetch("pancreatitis_severity.py", { cache: "no-store" });
+    if (!response.ok) throw new Error(`Unable to load calculator module (${response.status}).`);
+    const source = await response.text();
+    pyodide.FS.writeFile("/home/pyodide/pancreatitis_severity.py", source);
+    await pyodide.runPythonAsync("import pancreatitis_severity");
+    runtimeReady = true;
+    analyseButton.disabled = false;
+    analyseLabel.textContent = "Analyse";
+    runtimeStatus.textContent = "Calculator ready Â· runs locally";
+  } catch (error) {
+    runtimeStatus.textContent = "Calculator failed to load";
+    analyseLabel.textContent = "Unavailable";
+    showError(error);
+  }
+}
+
+async function analyse(event) {
+  event.preventDefault();
+  if (!runtimeReady || !pyodide) return;
+
+  errorBox.hidden = true;
+  analyseButton.disabled = true;
+  analyseLabel.textContent = "Analysingâ€¦";
+  resultStatus.textContent = "Calculating";
+
+  try {
+    const payload = payloadFromForm();
+    pyodide.globals.set("payload_json", JSON.stringify(payload));
+    const resultJson = await pyodide.runPythonAsync(`
+import json
+from dataclasses import asdict
+from pancreatitis_severity import PancreatitisLabs, AcutePancreatitisBundleEngine
+
+p = json.loads(payload_json)
+labs = PancreatitisLabs(
+    bun_mg_dl=p["bun"],
+    creatinine_mg_dl=p["cr"],
+    hematocrit_pct=p["hct"],
+    wbc_k_ul=p["wbc"],
+    temp_c=p["temp"],
+    heart_rate_bpm=int(p["hr"]),
+    resp_rate_bpm=int(p["rr"]),
+    pao2_fio2_ratio=p["pao2_fio2"],
+    systolic_bp_mmhg=p["sbp"],
+    arterial_ph=p["ph"],
+    age=int(p["age"]),
+    fluid_responsive_hypotension=p["fluid_responsive_hypotension"],
+)
+result = AcutePancreatitisBundleEngine().evaluate_patient(
+    patient_id=p["patient_id"],
+    labs=labs,
+    gcs_score=int(p["gcs"]),
+    pleural_effusion=p["pleural_effusion"],
+    organ_failure_duration_hours=p["of_hours"],
+    local_complications=p["local_complications"],
+    systemic_complications=p["systemic_complication"],
+    ct_balthazar_grade=p["balthazar"],
+    ct_necrosis_pct=p["necrosis"],
+    weight_kg=p["weight"],
+)
+json.dumps(asdict(result))
+`);
+    renderResult(JSON.parse(resultJson));
+  } catch (error) {
+    showError(error);
+  } finally {
+    analyseButton.disabled = false;
+    analyseLabel.textContent = "Analyse";
+  }
+}
+
+$("theme-toggle").addEventListener("click", () => {
+  setTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+});
+$("example-button").addEventListener("click", loadExample);
+$("reset-button").addEventListener("click", resetForm);
+form.addEventListener("submit", analyse);
+
+initTheme();
+resetForm();
+initialiseRuntime();
