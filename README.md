@@ -1,5 +1,7 @@
 # Acute Pancreatitis Bundle Agent
 
+### [Open the Live Application →](https://abusuraihsakhri.github.io/acute-pancreatitis-bundle-agent/)
+
 A Python calculator and browser interface for structured acute pancreatitis severity assessment. It combines the Revised Atlanta Classification, BISAP, Modified Marshall organ dysfunction score, SIRS criteria, Ranson criteria, and the original Balthazar CT Severity Index (CTSI).
 
 The project is intended for education, research, and clinical decision support. It assumes acute pancreatitis has already been diagnosed and does not replace clinical judgment, local protocols, or specialist assessment.
@@ -17,7 +19,7 @@ The project is intended for education, research, and clinical decision support. 
 
 ## Browser interface
 
-The static application lives in `site/` and is deployed by `.github/workflows/pages.yml` when GitHub Pages is enabled for the repository with **GitHub Actions** as the source.
+The static application lives in `site/` and is deployed by `.github/workflows/pages.yml` using GitHub Pages with **GitHub Actions** as the source.
 
 The browser downloads the Pyodide runtime and then executes `pancreatitis_severity.py` locally. Entered clinical values are not uploaded to this repository or stored by the page. The initial runtime download is comparatively large; subsequent calculations are local.
 
